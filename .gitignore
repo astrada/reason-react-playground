@@ -1,0 +1,7 @@
+*.swp
+
+/build
+/lib
+/node_modules
+.merlin
+yarn-error.log
