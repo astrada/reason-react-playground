@@ -1,10 +1,13 @@
 {
-  "name": "reason-scripts",
+  "name": "reason-react-playground",
   "sources": [
     "src"
   ],
   "bs-dependencies": [
     "reason-react",
+    "reason-react-toolbox"
+  ],
+  "bs-dev-dependencies": [
     "bs-jest"
   ],
   "reason": {

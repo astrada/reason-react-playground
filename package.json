@@ -1,10 +1,14 @@
 {
   "name": "reason-react-playground",
   "version": "0.1.0",
-  "private": true,
+  "description": "Reason React Playground with live code editor",
+  "repository": "https://github.com/astrada/reason-react-playground.git",
+  "author": "Alessandro Strada",
+  "license": "MIT",
   "dependencies": {
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
+    "react-toolbox": "^2.0.0-beta.12",
     "reason-scripts": "0.6.9"
   },
   "scripts": {
@@ -12,10 +16,14 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "prepare": "npm link bs-platform"
+    "prepare": "npm link bs-platform",
+    "clean": "bsb -clean-world",
+    "toolbox": "react-toolbox-themr"
   },
   "devDependencies": {
     "bs-jest": "^0.1.0",
-    "reason-react": "^0.2.4"
+    "react-toolbox-themr": "^1.0.2",
+    "reason-react": "^0.2.4",
+    "reason-react-toolbox": "^0.2.0"
   }
 }
