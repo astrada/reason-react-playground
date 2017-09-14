@@ -1,21 +1,43 @@
-[%bs.raw {|require('./app.css')|}];
+[%bs.raw {|require('./toolbox/theme.css')|}];
 
-external logo : string = "./logo.svg" [@@bs.module];
+external theme : ReactToolbox.ThemeProvider.theme = "./toolbox/theme" [@@bs.module];
 
-let component = ReasonReact.statelessComponent "App";
+type state = {reasonCode: string};
 
-let make ::message _children => {
+type action =
+  | UpdateReasonCode string
+  | Compile;
+
+let component = ReasonReact.reducerComponent "App";
+
+let make _children => {
   ...component,
-  render: fun _self =>
-    <div className="App">
-      <div className="App-header">
-        <img src=logo className="App-logo" alt="logo" />
-        <h2> (ReasonReact.stringToElement message) </h2>
+  initialState: fun () => {reasonCode: ""},
+  reducer: fun action state =>
+    switch action {
+    | UpdateReasonCode code => ReasonReact.Update {...state, reasonCode: code}
+    | Compile => ReasonReact.NoUpdate
+    },
+  render: fun self => {
+    let logo = <Logo />;
+    let onChange code event => {
+      let reduce = self.reduce (fun _event => UpdateReasonCode code);
+      reduce event
+    };
+    <ReactToolbox.ThemeProvider theme>
+      <div>
+        <ReactToolbox.AppBar title="App example" leftIcon=logo />
+        <section style=(ReactDOMRe.Style.make padding::"20px" ())>
+          <ReactToolbox.Input
+            _type="text"
+            multiline=true
+            label=(ReasonReact.stringToElement "ReasonML")
+            value=self.state.reasonCode
+            onChange
+          />
+          <ReactToolbox.Button label="Compile" primary=true />
+        </section>
       </div>
-      <p className="App-intro">
-        (ReasonReact.stringToElement "To get started, edit")
-        <code> (ReasonReact.stringToElement " src/App.re ") </code>
-        (ReasonReact.stringToElement "and save to reload.")
-      </p>
-    </div>
+    </ReactToolbox.ThemeProvider>
+  }
 };
