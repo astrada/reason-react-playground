@@ -4,6 +4,8 @@ external reactClass : ReasonReact.reactClass = "react-codemirror" [@@bs.module];
 
 [%bs.raw {|require('codemirror/mode/mllike/mllike')|}];
 
+[%bs.raw {|require('codemirror/mode/rust/rust')|}];
+
 type scrollInfo =
   Js.t {
     .

@@ -30,11 +30,13 @@ let labelStyle =
     borderRadius::"0 0 0 5px"
     ();
 
-let make ::label ::code=? ::onChange=? _children => {
+let make ::label ::mode ::code=? ::onChange=? _children => {
   ...component,
-  render: fun _self =>
+  render: fun _self => {
+    let optionsWithMode = Js.Obj.assign options {"mode": mode};
     <div style=rowStyle>
       <div style=labelStyle> (ReasonReact.stringToElement label) </div>
-      <CodeMirror value=?code onChange=?onChange options />
+      <CodeMirror value=?code onChange=?onChange options=optionsWithMode />
     </div>
+  }
 };
