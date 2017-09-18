@@ -2,77 +2,123 @@
 
 external theme : ReactToolbox.ThemeProvider.theme = "./toolbox/theme" [@@bs.module];
 
-type jsCompilerResult =
-  | JsCode string
-  | JsErrorMessage string;
-
 type state = {
   reasonCode: string,
-  jsCompilerResult,
+  refmtResult: Utils.compilerResult,
+  ocamlCode: string,
+  bucklescriptResult: Utils.compilerResult,
   compiling: bool
 };
 
 type action =
-  | UpdateJsCompilerResult jsCompilerResult
-  | Compile string;
+  | CompileReason string
+  | UpdateRefmtResult Utils.compilerResult
+  | CompileOCaml string
+  | UpdateBucklescriptResult Utils.compilerResult;
 
 let component = ReasonReact.reducerComponent "App";
 
 let make _children => {
   ...component,
-  initialState: fun () => {reasonCode: "", jsCompilerResult: JsCode "", compiling: false},
+  initialState: fun () => {
+    reasonCode: "",
+    refmtResult: Utils.OutputCode "",
+    ocamlCode: "",
+    bucklescriptResult: Utils.OutputCode "",
+    compiling: false
+  },
   reducer: fun action state =>
     switch action {
-    | UpdateJsCompilerResult jsCompilerResult =>
-      ReasonReact.Update {...state, compiling: false, jsCompilerResult}
-    | Compile reasonCode => ReasonReact.Update {...state, reasonCode, compiling: true}
+    | CompileReason reasonCode => ReasonReact.Update {...state, reasonCode, compiling: true}
+    | UpdateRefmtResult refmtResult =>
+      let ocamlCode =
+        switch refmtResult {
+        | Utils.OutputCode code => code
+        | _ => ""
+        };
+      ReasonReact.Update {...state, ocamlCode, refmtResult, compiling: false}
+    | CompileOCaml ocamlCode => ReasonReact.Update {...state, ocamlCode, compiling: true}
+    | UpdateBucklescriptResult bucklescriptResult =>
+      ReasonReact.Update {...state, compiling: false, bucklescriptResult}
     },
   render: fun self => {
     let logo = <Logo />;
-    let compile code event => {
-      let worker = Worker.make "CompilerWorker.js";
-      Worker.onMessage
-        worker
-        (
-          fun messageEvent => {
-            let result = CompilerWorker.toCompilerResult messageEvent##data;
-            let jsCode = Js.Nullable.to_opt result##js_code;
-            let jsErrorMessage =
-              Js.Option.firstSome
-                (Js.Nullable.to_opt result##js_error_msg) (Js.Nullable.to_opt result##message)
-              |> Js.Option.getWithDefault "";
-            let jsCompilerResult =
-              if (Js.Option.isSome jsCode) {
-                JsCode (Js.Option.getExn jsCode)
-              } else {
-                JsErrorMessage jsErrorMessage
-              };
-            let reduce = self.reduce (fun _event => UpdateJsCompilerResult jsCompilerResult);
-            reduce event
-          }
-        );
-      Worker.postMessage worker code;
-      let reduce = self.reduce (fun _event => Compile code);
+    let compileReason code event => {
+      /*Utils.compileReason
+          code
+          (
+            fun compilerResult => {
+              let reduce = self.reduce (fun _event => UpdateRefmtResult compilerResult);
+              reduce event
+            }
+          );
+        let reduce = self.reduce (fun _event => CompileReason code);
+        reduce event*/
+      let reduce = self.reduce (fun _event => UpdateRefmtResult (Utils.OutputCode code));
+      reduce event
+    };
+    let compileOCaml code event => {
+      /*Utils.compileOCaml
+          code
+          (
+            fun compilerResult => {
+              let reduce = self.reduce (fun _event => UpdateBucklescriptResult compilerResult);
+              reduce event
+            }
+          );
+        let reduce = self.reduce (fun _event => CompileReason code);
+        reduce event*/
+      let reduce = self.reduce (fun _event => UpdateBucklescriptResult (Utils.OutputCode code));
       reduce event
     };
     let (jsCode, jsErrorMessage) =
-      switch self.state.jsCompilerResult {
-      | JsCode jsCode => (jsCode, "")
-      | JsErrorMessage jsErrorMessage => ("", jsErrorMessage)
+      switch self.state.bucklescriptResult {
+      | Utils.OutputCode jsCode => (jsCode, "")
+      | Utils.ErrorMessage errorMessage => ("", errorMessage)
       };
-    let onChange code _change => compile code ();
-    let debouncedOnChange = Utils.debounce onChange wait::500.0;
+    let onReasonChange code _change => compileReason code ();
+    let debouncedOnReasonChange = Utils.debounce onReasonChange wait::500.0;
+    let onOCamlChange code _change => compileOCaml code ();
+    let debouncedOnOCamlChange = Utils.debounce onOCamlChange wait::500.0;
+    let onch1 code _ => {
+      let reduce = self.reduce (fun _event => CompileReason code);
+      reduce ()
+    };
+    let onch2 code _ => {
+      let reduce = self.reduce (fun _event => CompileOCaml code);
+      reduce ()
+    };
     <ReactToolbox.ThemeProvider theme>
       <div>
         <ReactToolbox.AppBar title="App example" leftIcon=logo />
         <section>
-          <CodeEditor label="Reason" code=self.state.reasonCode onChange=debouncedOnChange />
+          <CodeEditor
+            label="Reason"
+            mode="rust"
+            code=self.state.reasonCode
+            onChange=onch1
+            /*onChange=debouncedOnReasonChange*/
+          />
           <ReactToolbox.Button
             label="Compile"
             primary=true
             raised=true
-            onClick=(compile self.state.reasonCode)
-            disabled=self.state.compiling
+            onClick=(compileReason self.state.reasonCode)
+            /*disabled=self.state.compiling*/
+          />
+          <CodeEditor
+            label="OCaml"
+            mode="mllike"
+            code=self.state.ocamlCode
+            onChange=onch2
+            /*onChange=debouncedOnOCamlChange*/
+          />
+          <ReactToolbox.Button
+            label="Compile"
+            primary=true
+            raised=true
+            onClick=(compileOCaml self.state.ocamlCode)
+            /*disabled=self.state.compiling*/
           />
           <ReactToolbox.Input
             _type="text"
