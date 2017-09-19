@@ -44,31 +44,27 @@ let make _children => {
   render: fun self => {
     let logo = <Logo />;
     let compileReason code event => {
-      /*Utils.compileReason
-          code
-          (
-            fun compilerResult => {
-              let reduce = self.reduce (fun _event => UpdateRefmtResult compilerResult);
-              reduce event
-            }
-          );
-        let reduce = self.reduce (fun _event => CompileReason code);
-        reduce event*/
-      let reduce = self.reduce (fun _event => UpdateRefmtResult (Utils.OutputCode code));
+      Utils.compileReason
+        code
+        (
+          fun compilerResult => {
+            let reduce = self.reduce (fun _event => UpdateRefmtResult compilerResult);
+            reduce event
+          }
+        );
+      let reduce = self.reduce (fun _event => CompileReason code);
       reduce event
     };
     let compileOCaml code event => {
-      /*Utils.compileOCaml
-          code
-          (
-            fun compilerResult => {
-              let reduce = self.reduce (fun _event => UpdateBucklescriptResult compilerResult);
-              reduce event
-            }
-          );
-        let reduce = self.reduce (fun _event => CompileReason code);
-        reduce event*/
-      let reduce = self.reduce (fun _event => UpdateBucklescriptResult (Utils.OutputCode code));
+      Utils.compileOCaml
+        code
+        (
+          fun compilerResult => {
+            let reduce = self.reduce (fun _event => UpdateBucklescriptResult compilerResult);
+            reduce event
+          }
+        );
+      let reduce = self.reduce (fun _event => CompileReason code);
       reduce event
     };
     let (jsCode, jsErrorMessage) =
@@ -80,14 +76,6 @@ let make _children => {
     let debouncedOnReasonChange = Utils.debounce onReasonChange wait::500.0;
     let onOCamlChange code _change => compileOCaml code ();
     let debouncedOnOCamlChange = Utils.debounce onOCamlChange wait::500.0;
-    let onch1 code _ => {
-      let reduce = self.reduce (fun _event => CompileReason code);
-      reduce ()
-    };
-    let onch2 code _ => {
-      let reduce = self.reduce (fun _event => CompileOCaml code);
-      reduce ()
-    };
     <ReactToolbox.ThemeProvider theme>
       <div>
         <ReactToolbox.AppBar title="App example" leftIcon=logo />
@@ -96,29 +84,27 @@ let make _children => {
             label="Reason"
             mode="rust"
             code=self.state.reasonCode
-            onChange=onch1
-            /*onChange=debouncedOnReasonChange*/
+            onChange=debouncedOnReasonChange
           />
           <ReactToolbox.Button
             label="Compile"
             primary=true
             raised=true
             onClick=(compileReason self.state.reasonCode)
-            /*disabled=self.state.compiling*/
+            disabled=self.state.compiling
           />
           <CodeEditor
             label="OCaml"
             mode="mllike"
             code=self.state.ocamlCode
-            onChange=onch2
-            /*onChange=debouncedOnOCamlChange*/
+            onChange=debouncedOnOCamlChange
           />
           <ReactToolbox.Button
             label="Compile"
             primary=true
             raised=true
             onClick=(compileOCaml self.state.ocamlCode)
-            /*disabled=self.state.compiling*/
+            disabled=self.state.compiling
           />
           <ReactToolbox.Input
             _type="text"
