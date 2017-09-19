@@ -1,6 +1,6 @@
 [%bs.raw {|require('codemirror/lib/codemirror.css')|}];
 
-external reactClass : ReasonReact.reactClass = "react-codemirror" [@@bs.module];
+external reactClass : ReasonReact.reactClass = "@skidding/react-codemirror" [@@bs.module];
 
 [%bs.raw {|require('codemirror/mode/mllike/mllike')|}];
 
