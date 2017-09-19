@@ -30,13 +30,31 @@ let labelStyle =
     borderRadius::"0 0 0 5px"
     ();
 
-let make ::label ::mode ::code=? ::onChange=? _children => {
+let errorBodyStyle = ReactDOMRe.Style.make fontFamily::"monospace" fontSize::"12pt" ();
+
+let errorStyle = ReactDOMRe.Style.make backgroundColor::"#faa" padding::"10px 20px" ();
+
+let make ::label ::mode ::code=? ::error=? ::onChange=? _children => {
   ...component,
   render: fun _self => {
     let optionsWithMode = Js.Obj.assign options {"mode": mode};
+    let errorDiv =
+      switch error {
+      | None => ReasonReact.nullElement
+      | Some e =>
+        <div style=errorStyle>
+          <div style=errorBodyStyle> (ReasonReact.stringToElement e) </div>
+        </div>
+      };
     <div style=rowStyle>
       <div style=labelStyle> (ReasonReact.stringToElement label) </div>
-      <CodeMirror value=?code onChange=?onChange options=optionsWithMode />
+      <CodeMirror
+        value=?code
+        onChange=?onChange
+        options=optionsWithMode
+        preservePositionScroll=true
+      />
+      errorDiv
     </div>
   }
 };
