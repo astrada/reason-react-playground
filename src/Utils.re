@@ -46,7 +46,7 @@ let compileReason code onDone => {
         let ocamlCode = result##ocamlCode;
         let errorMessage = result##errorMessage;
         let compilerResult =
-          if (ocamlCode != "") {
+          if (errorMessage == "") {
             OutputCode ocamlCode
           } else {
             ErrorMessage errorMessage
