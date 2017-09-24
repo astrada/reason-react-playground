@@ -38,14 +38,6 @@ let make ::label ::mode ::code=? ::error=? ::onChange=? _children => {
   ...component,
   render: fun _self => {
     let optionsWithMode = Js.Obj.assign options {"mode": mode};
-    let errorDiv =
-      switch error {
-      | None => ReasonReact.nullElement
-      | Some e =>
-        <div style=errorStyle>
-          <div style=errorBodyStyle> (ReasonReact.stringToElement e) </div>
-        </div>
-      };
     <div style=rowStyle>
       <div style=labelStyle> (ReasonReact.stringToElement label) </div>
       <CodeMirror
@@ -54,7 +46,7 @@ let make ::label ::mode ::code=? ::error=? ::onChange=? _children => {
         options=optionsWithMode
         preservePositionScroll=true
       />
-      errorDiv
+      <Error errorMessage=?error />
     </div>
   }
 };
