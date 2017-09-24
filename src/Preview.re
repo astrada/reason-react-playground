@@ -1,8 +1,4 @@
-/*
- import React from 'react';
- import ReactDOM from 'react-dom';
- import * as ReactToolbox from 'react-toolbox';
- */
+/* Based on https://github.com/react-toolbox/react-toolbox/blob/dev/docs/app/components/preview/index.js */
 type jsModule;
 
 external reactModule : jsModule = "react" [@@bs.module];
@@ -11,20 +7,22 @@ external buttonModule : jsModule = "default" [@@bs.module "react-toolbox/lib/but
 
 external objGet : Js.t {..} => string => 'a = "" [@@bs.get_index];
 
-external eval : string => 'a = "" [@@bs.val];
+type scopedFunction;
 
-external apply : 'a => Js.null (Js.t {..}) => array 'a => ReasonReact.reactElement =
-  "" [@@bs.send];
+external evalToScopedFunction : string => scopedFunction = "eval" [@@bs.val];
 
-let errorStyle =
+external applyScope : scopedFunction => Js.null (Js.t {..}) => array 'a => ReasonReact.reactElement =
+  "apply" [@@bs.send];
+
+let previewStyle =
   ReactDOMRe.Style.make
-    backgroundColor::"#faa"
-    borderBottom::"1px solid"
-    color::"black"
-    fontFamily::"monospace"
-    fontSize::"14pt"
-    lineHeight::"14px"
-    padding::"5px 10px"
+    display::"flex"
+    flexDirection::"column"
+    minHeight::"300px"
+    border::"1px solid #aaa"
+    position::"relative"
+    overflow::"auto"
+    margin::"20px 0 20px 0"
     ();
 
 let contentStyle = ReactDOMRe.Style.make flexGrow::"1" margin::"10px" ();
@@ -39,26 +37,36 @@ type state = {
 let handleRef elementRef self => self.ReasonReact.state.mountNode := Js.Null.to_opt elementRef;
 
 type action =
-  | EvalError string;
+  | EvalError (option string);
 
 let component = ReasonReact.reducerComponentWithRetainedProps "Preview";
 
-let compile scope self =>
+let executeCode self scope =>
   switch !self.ReasonReact.state.mountNode {
   | None => ()
   | Some mn =>
-    ReactDOMRe.unmountComponentAtNode mn;
-    let scope = Js.Option.getWithDefault {"React": reactModule, "Button": buttonModule} scope;
-    let scopeArguments = Js.Obj.keys scope |> Js.Array.joinWith ", ";
-    let code = self.ReasonReact.retainedProps.code;
-    let functionToEvaluate = {j|(function ($(scopeArguments), mountNode) {
-      $(code)
-    });|j};
-    let evaluedFunction = eval functionToEvaluate;
-    let scopeValues =
-      Js.Obj.keys scope |> Js.Array.map (fun k => objGet scope k) |> Js.Array.concat [|mn|];
-    let reactElement = apply evaluedFunction Js.null scopeValues;
-    ReactDOMRe.render reactElement mn
+    let error =
+      try {
+        try (ReactDOMRe.unmountComponentAtNode mn) {
+        | Js.Exn.Error e => Js.log (Js.Exn.message e)
+        };
+        let defaultScope = {"React": reactModule, "Button": buttonModule};
+        let scope = Js.Option.getWithDefault defaultScope scope;
+        let scopeArguments = Js.Obj.keys scope |> Js.Array.joinWith ", ";
+        let code = self.ReasonReact.retainedProps.code;
+        let functionToEvaluate = {j|(function ($(scopeArguments), mountNode) {
+  $(code)
+});|j};
+        let evaluedFunction = evalToScopedFunction functionToEvaluate;
+        let scopeValues =
+          Js.Obj.keys scope |> Js.Array.map (fun k => objGet scope k) |> Js.Array.concat [|mn|];
+        let reactElement = applyScope evaluedFunction Js.null scopeValues;
+        ReactDOMRe.render reactElement mn;
+        None
+      } {
+      | Js.Exn.Error e => Js.Exn.message e
+      };
+    self.reduce (fun _ => EvalError error) ()
   };
 
 let make ::code ::className=? ::scope=? _children => {
@@ -67,32 +75,26 @@ let make ::code ::className=? ::scope=? _children => {
   initialState: fun () => {error: None, mountNode: ref None},
   reducer: fun action state =>
     switch action {
-    | EvalError error => ReasonReact.Update {...state, error: Some error}
+    | EvalError error => ReasonReact.Update {...state, error}
     },
   didMount: fun self => {
-    compile scope self;
+    executeCode self scope;
     ReasonReact.NoUpdate
   },
   didUpdate: fun {oldSelf, newSelf} =>
     if (oldSelf.retainedProps.code !== newSelf.retainedProps.code) {
-      compile scope newSelf
+      executeCode newSelf scope
     },
   render: fun self => {
     let className = Js.Option.getWithDefault "" className;
-    let errorElement =
-      switch self.state.error {
-      | None => ReasonReact.nullElement
-      | Some e => <span style=errorStyle> (ReasonReact.stringToElement e) </span>
-      };
-    <div className> errorElement <div ref=(self.handle handleRef) style=contentStyle /> </div>
+    <div className style=previewStyle>
+      <div ref=(self.handle handleRef) style=contentStyle />
+      <Error errorMessage=?self.state.error />
+    </div>
   }
 };
 /*
  const Preview = React.createClass({
-   componentDidMount () {
-     this.executeCode();
-   },
-
    componentDidUpdate (prevProps) {
      clearTimeout(this.timeoutID);
      if (this.props.code !== prevProps.code) {
@@ -103,21 +105,6 @@ let make ::code ::className=? ::scope=? _children => {
    setTimeout () {
      clearTimeout(this.timeoutID);
      this.timeoutID = setTimeout(...arguments);
-   },
-
-   compileCode () {
-     const code = `
-       (function (${Object.keys(this.props.scope).join(', ')}, mountNode) {
-         ${this.props.code}
-       });`;
-
-     return transform(code, {
-       presets: ['es2015', 'stage-0', 'react']
-     }).code;
-   },
-
-   buildScope (mountNode) {
-     return Object.keys(this.props.scope).map(key => this.props.scope[key]).concat(mountNode);
    },
 
    executeCode () {
