@@ -7,7 +7,7 @@ set -e
 DIR="stdlib"
 URL="https://api.github.com/repos/Bucklescript/bucklescript-playground/contents/stdlib"
 
-if [ ! -d $DIR ]; then
+if [[ ! -d $DIR ]]; then
   mkdir $DIR
 fi
 
