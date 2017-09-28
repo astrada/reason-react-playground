@@ -22,7 +22,7 @@ let compileOCaml code onDone => {
         let jsCode = Js.Nullable.to_opt result##js_code;
         let errorMessage =
           Js.Option.firstSome
-            (Js.Nullable.to_opt result##js_error_msg) (Js.Nullable.to_opt result##message)
+            (Js.Nullable.to_opt result##js_error_msg) (Js.Nullable.to_opt result##text)
           |> Js.Option.getWithDefault "";
         let compilerResult =
           if (Js.Option.isSome jsCode) {
