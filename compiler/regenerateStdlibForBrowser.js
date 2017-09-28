@@ -1,4 +1,6 @@
-// Based on
+#!/usr/bin/env node
+
+// Based on:
 // https://github.com/reasonml/reasonml.github.io/blob/source/regenerateStdlibForBrowser.js
 
 const fs = require('fs');
@@ -19,12 +21,13 @@ try {
 };
 
 stdlibDirFiles.forEach(file => {
-  const exposedRequireName = path.basename(file, '.js');
+  const exposedRequireName = path.join('stdlib', path.basename(file, '.js'));
   // map `require('stdlib/list')` from the playground to `require('./stdlib/list.js')`
   b.require(path.join(stdlibDir, file), {expose: exposedRequireName});
 });
 
 b
+  .transform('deamdify')
   .transform('uglifyify', { global: true })
   .require(path.join(__dirname, 'dummy.js'), {expose: 'fs'})
   .bundle()
