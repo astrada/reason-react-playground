@@ -1,19 +1,4 @@
 /* Based on https://github.com/react-toolbox/react-toolbox/blob/dev/docs/app/components/preview/index.js */
-type jsModule;
-
-external reactModule : jsModule = "react" [@@bs.module];
-
-external buttonModule : jsModule = "default" [@@bs.module "react-toolbox/lib/button/Button"];
-
-external objGet : Js.t {..} => string => 'a = "" [@@bs.get_index];
-
-type scopedFunction;
-
-external evalToScopedFunction : string => scopedFunction = "eval" [@@bs.val];
-
-external applyScope : scopedFunction => Js.null (Js.t {..}) => array 'a => ReasonReact.reactElement =
-  "apply" [@@bs.send];
-
 let previewStyle =
   ReactDOMRe.Style.make
     display::"flex"
@@ -30,66 +15,52 @@ let contentStyle = ReactDOMRe.Style.make flexGrow::"1" margin::"10px" ();
 type retainedProps = {code: string};
 
 type state = {
-  error: option string,
-  mountNode: ref (option Dom.element)
+  evalResult: Utils.evalResult,
+  evaluatingJs: bool
 };
 
-let handleRef elementRef self => self.ReasonReact.state.mountNode := Js.Null.to_opt elementRef;
-
 type action =
-  | EvalError (option string);
+  | UpdateEvalResult Utils.evalResult;
 
 let component = ReasonReact.reducerComponentWithRetainedProps "Preview";
 
-let executeCode self scope =>
-  switch !self.ReasonReact.state.mountNode {
-  | None => ()
-  | Some mn =>
-    let error =
-      try {
-        try (ReactDOMRe.unmountComponentAtNode mn) {
-        | Js.Exn.Error e => Js.log (Js.Exn.message e)
-        };
-        let defaultScope = {"React": reactModule, "Button": buttonModule};
-        let scope = Js.Option.getWithDefault defaultScope scope;
-        let scopeArguments = Js.Obj.keys scope |> Js.Array.joinWith ", ";
-        let code = self.ReasonReact.retainedProps.code;
-        let functionToEvaluate = {j|(function ($(scopeArguments), mountNode) {
-  $(code)
-});|j};
-        let evaluedFunction = evalToScopedFunction functionToEvaluate;
-        let scopeValues =
-          Js.Obj.keys scope |> Js.Array.map (fun k => objGet scope k) |> Js.Array.concat [|mn|];
-        let reactElement = applyScope evaluedFunction Js.null scopeValues;
-        ReactDOMRe.render reactElement mn;
-        None
-      } {
-      | Js.Exn.Error e => Js.Exn.message e
-      };
-    self.reduce (fun _ => EvalError error) ()
-  };
+let executeCode (self: ReasonReact.self state retainedProps action) => {
+  let code = self.ReasonReact.retainedProps.code;
+  Utils.evalJs code (fun evalResult => self.reduce (fun _ => UpdateEvalResult evalResult) ())
+};
 
-let make ::code ::className=? ::scope=? _children => {
+let make ::code ::className=? _children => {
   ...component,
   retainedProps: {code: code},
-  initialState: fun () => {error: None, mountNode: ref None},
+  initialState: fun () => {
+    evalResult: Utils.ReactElement ReasonReact.nullElement,
+    evaluatingJs: false
+  },
   reducer: fun action state =>
     switch action {
-    | EvalError error => ReasonReact.Update {...state, error}
+    | UpdateEvalResult evalResult => ReasonReact.Update {...state, evalResult, evaluatingJs: true}
     },
   didMount: fun self => {
-    executeCode self scope;
+    executeCode self;
     ReasonReact.NoUpdate
   },
   didUpdate: fun {oldSelf, newSelf} =>
     if (oldSelf.retainedProps.code !== newSelf.retainedProps.code) {
-      executeCode newSelf scope
+      executeCode newSelf
     },
-  render: fun self => {
+  render: fun (self: ReasonReact.self state retainedProps action) => {
     let className = Js.Option.getWithDefault "" className;
-    <div className style=previewStyle>
-      <div ref=(self.handle handleRef) style=contentStyle />
-      <Error errorMessage=?self.state.error />
-    </div>
+    let reactElement =
+      switch self.state.evalResult {
+      | Utils.ReactElement re => re
+      | Utils.ErrorMessage _ => ReasonReact.nullElement
+      };
+    let errorMessage =
+      switch self.state.evalResult {
+      | Utils.ReactElement _
+      | Utils.ErrorMessage "" => None
+      | Utils.ErrorMessage e => Some e
+      };
+    <div className style=previewStyle> reactElement <Error errorMessage=?errorMessage /> </div>
   }
 };

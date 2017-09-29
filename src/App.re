@@ -19,13 +19,22 @@ type action =
 
 let component = ReasonReact.reducerComponent "App";
 
+let test_ocaml = {j|let component = ReasonReact.statelessComponent "Test"
+let make ~message  _children =
+  {
+    component with
+    render =
+      (fun _self  ->
+         ((div ~children:[ReasonReact.stringToElement message] ())[@JSX ]))
+  }|j};
+
 let make _children => {
   ...component,
   initialState: fun () => {
     reasonCode: "",
     refmtResult: Utils.OutputCode "",
     compilingReason: false,
-    ocamlCode: "",
+    ocamlCode: test_ocaml,
     bucklescriptResult: Utils.OutputCode "",
     compilingOCaml: false
   },
@@ -89,7 +98,7 @@ let make _children => {
       };
     <ReactToolbox.ThemeProvider theme>
       <div>
-        <ReactToolbox.AppBar title="App example" leftIcon=logo />
+        <ReactToolbox.AppBar title="Reason React Playground" leftIcon=logo />
         <section>
           <CodeEditor
             label="Reason"
@@ -125,6 +134,7 @@ let make _children => {
             label=(ReasonReact.stringToElement "JS")
             value=(jsCode ^ jsErrorMessage)
           />
+          <Preview code=jsCode />
         </section>
       </div>
     </ReactToolbox.ThemeProvider>

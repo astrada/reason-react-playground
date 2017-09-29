@@ -56,3 +56,27 @@ let compileReason code onDone => {
     );
   Worker.postMessage worker code
 };
+
+type evalResult =
+  | ReactElement ReasonReact.reactElement
+  | ErrorMessage string;
+
+let evalJs code onDone => {
+  let worker = Worker.make "EvalJsWorker.js";
+  Worker.onMessage
+    worker
+    (
+      fun messageEvent => {
+        let result = EvalJsWorker.toEvalResult messageEvent##data;
+        let reactElement = Js.Nullable.to_opt result##reactElement;
+        let errorMessage = Js.Nullable.to_opt result##errorMessage;
+        let evalResult =
+          switch reactElement {
+          | Some re => ReactElement re
+          | None => ErrorMessage (Js.Option.getWithDefault "" errorMessage)
+          };
+        onDone evalResult
+      }
+    );
+  Worker.postMessage worker code
+};

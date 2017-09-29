@@ -9,3 +9,9 @@ type compilerResult =
 let compileReason: string => (compilerResult => unit) => unit;
 
 let compileOCaml: string => (compilerResult => unit) => unit;
+
+type evalResult =
+  | ReactElement ReasonReact.reactElement
+  | ErrorMessage string;
+
+let evalJs: string => (evalResult => unit) => unit;

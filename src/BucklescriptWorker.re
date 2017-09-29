@@ -21,6 +21,8 @@ external compile : compiler => string => string = "" [@@bs.send];
 
 Worker.importScripts Worker.Script.self "bucklescript.js";
 
+Worker.importScripts Worker.Script.self "load_module.js";
+
 Worker.onMessage
   Worker.Script.self
   (
