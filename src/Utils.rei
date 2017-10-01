@@ -10,8 +10,12 @@ let compileReason: string => (compilerResult => unit) => unit;
 
 let compileOCaml: string => (compilerResult => unit) => unit;
 
+let compileOCamlSync: string => (compilerResult => unit) => unit;
+
 type evalResult =
-  | ReactElement ReasonReact.reactElement
+  | Success
   | ErrorMessage string;
+
+let evalJsSync: string => (evalResult => unit) => unit;
 
 let evalJs: string => (evalResult => unit) => unit;

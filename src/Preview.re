@@ -26,16 +26,13 @@ let component = ReasonReact.reducerComponentWithRetainedProps "Preview";
 
 let executeCode (self: ReasonReact.self state retainedProps action) => {
   let code = self.ReasonReact.retainedProps.code;
-  Utils.evalJs code (fun evalResult => self.reduce (fun _ => UpdateEvalResult evalResult) ())
+  Utils.evalJsSync code (fun evalResult => self.reduce (fun _ => UpdateEvalResult evalResult) ())
 };
 
 let make ::code ::className=? _children => {
   ...component,
   retainedProps: {code: code},
-  initialState: fun () => {
-    evalResult: Utils.ReactElement ReasonReact.nullElement,
-    evaluatingJs: false
-  },
+  initialState: fun () => {evalResult: Utils.Success, evaluatingJs: false},
   reducer: fun action state =>
     switch action {
     | UpdateEvalResult evalResult => ReasonReact.Update {...state, evalResult, evaluatingJs: true}
@@ -50,17 +47,14 @@ let make ::code ::className=? _children => {
     },
   render: fun (self: ReasonReact.self state retainedProps action) => {
     let className = Js.Option.getWithDefault "" className;
-    let reactElement =
-      switch self.state.evalResult {
-      | Utils.ReactElement re => re
-      | Utils.ErrorMessage _ => ReasonReact.nullElement
-      };
     let errorMessage =
       switch self.state.evalResult {
-      | Utils.ReactElement _
-      | Utils.ErrorMessage "" => None
+      | Utils.Success => None
       | Utils.ErrorMessage e => Some e
       };
-    <div className style=previewStyle> reactElement <Error errorMessage=?errorMessage /> </div>
+    <div className style=previewStyle>
+      <div id="preview" />
+      <Error errorMessage=?errorMessage />
+    </div>
   }
 };

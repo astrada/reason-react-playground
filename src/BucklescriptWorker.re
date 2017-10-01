@@ -19,16 +19,18 @@ external ocaml : compiler = "" [@@bs.val];
 
 external compile : compiler => string => string = "" [@@bs.send];
 
-Worker.importScripts Worker.Script.self "bucklescript.js";
+let compileSync code => Js.Json.parseExn (compile ocaml code);
+/*
+ Worker.importScripts Worker.Script.self "bucklescript.js";
 
-Worker.importScripts Worker.Script.self "load_module.js";
+ Worker.importScripts Worker.Script.self "load_module.js";
 
-Worker.onMessage
-  Worker.Script.self
-  (
-    fun evt => {
-      let code = evt##data;
-      let result = Js.Json.parseExn (compile ocaml code);
-      Worker.postMessage Worker.Script.self result
-    }
-  );
+ Worker.onMessage
+   Worker.Script.self
+   (
+     fun evt => {
+       let result = compileCode evt##data;
+       Worker.postMessage Worker.Script.self result
+     }
+   );
+ */

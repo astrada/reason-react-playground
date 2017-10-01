@@ -19,22 +19,24 @@ type action =
 
 let component = ReasonReact.reducerComponent "App";
 
-let test_ocaml = {j|let component = ReasonReact.statelessComponent "Test"
-let make ~message  _children =
-  {
-    component with
-    render =
-      (fun _self  ->
-         ((div ~children:[ReasonReact.stringToElement message] ())[@JSX ]))
-  }|j};
+let test_reason_code = {j|module Greeting = {
+  let component = ReasonReact.statelessComponent "Greeting";
+
+  /* underscore before names indicate unused variables. We name them for clarity */
+  let make _children => {
+    ...component,
+    render: fun self => <button> (ReasonReact.stringToElement "Hello!") </button>
+  };
+};
+ReactDOMRe.renderToElementWithId <Greeting /> "preview";|j};
 
 let make _children => {
   ...component,
   initialState: fun () => {
-    reasonCode: "",
+    reasonCode: test_reason_code,
     refmtResult: Utils.OutputCode "",
     compilingReason: false,
-    ocamlCode: test_ocaml,
+    ocamlCode: "",
     bucklescriptResult: Utils.OutputCode "",
     compilingOCaml: false
   },
@@ -55,7 +57,7 @@ let make _children => {
   render: fun self => {
     let logo = <Logo />;
     let compileOCaml code event => {
-      Utils.compileOCaml
+      Utils.compileOCamlSync
         code
         (
           fun compilerResult => {
