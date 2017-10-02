@@ -6,14 +6,14 @@ type compilerResult =
   | OutputCode string
   | ErrorMessage string;
 
-let compileReason: string => (compilerResult => unit) => unit;
+let compileReason: string => compilerResult;
 
-let jsxv3Rewrite: string => (compilerResult => unit) => unit;
+let jsxv3Rewrite: string => compilerResult;
 
-let compileOCaml: string => (compilerResult => unit) => unit;
+let compileOCaml: string => compilerResult;
 
 type evalResult =
   | Success
   | ErrorMessage string;
 
-let evalJs: string => (evalResult => unit) => unit;
+let evalJs: string => evalResult;

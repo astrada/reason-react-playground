@@ -26,7 +26,8 @@ let component = ReasonReact.reducerComponentWithRetainedProps "Preview";
 
 let executeCode (self: ReasonReact.self state retainedProps action) => {
   let code = self.ReasonReact.retainedProps.code;
-  Utils.evalJs code (fun evalResult => self.reduce (fun _ => UpdateEvalResult evalResult) ())
+  let evalResult = Utils.evalJs code;
+  self.reduce (fun _ => UpdateEvalResult evalResult) ()
 };
 
 let make ::code ::className=? _children => {

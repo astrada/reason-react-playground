@@ -57,44 +57,25 @@ let make _children => {
   render: fun self => {
     let logo = <Logo />;
     let compileOCaml code event => {
-      Utils.jsxv3Rewrite
-        code
-        (
-          fun compilerResult =>
-            switch compilerResult {
-            | Utils.OutputCode ocamlCode =>
-              Utils.compileOCaml
-                ocamlCode
-                (
-                  fun compilerResult => {
-                    let reduce =
-                      self.reduce (fun _event => UpdateBucklescriptResult compilerResult);
-                    reduce event
-                  }
-                )
-            | Utils.ErrorMessage _ =>
-              let reduce = self.reduce (fun _event => UpdateBucklescriptResult compilerResult);
-              reduce event
-            }
-        );
-      let reduce = self.reduce (fun _event => CompileOCaml code);
-      reduce event
+      let rewriteResult = Utils.jsxv3Rewrite code;
+      switch rewriteResult {
+      | Utils.OutputCode ocamlCode =>
+        let compilerResult = Utils.compileOCaml ocamlCode;
+        let reduce = self.reduce (fun _event => UpdateBucklescriptResult compilerResult);
+        reduce event
+      | Utils.ErrorMessage _ =>
+        let reduce = self.reduce (fun _event => UpdateBucklescriptResult rewriteResult);
+        reduce event
+      }
     };
     let compileReason code event => {
-      Utils.compileReason
-        code
-        (
-          fun compilerResult => {
-            let reduce = self.reduce (fun _event => UpdateRefmtResult compilerResult);
-            reduce event;
-            switch compilerResult {
-            | Utils.OutputCode ocamlCode => compileOCaml ocamlCode ()
-            | _ => ()
-            }
-          }
-        );
-      let reduce = self.reduce (fun _event => CompileReason code);
-      reduce event
+      let compilerResult = Utils.compileReason code;
+      let reduce = self.reduce (fun _event => UpdateRefmtResult compilerResult);
+      reduce event;
+      switch compilerResult {
+      | Utils.OutputCode ocamlCode => compileOCaml ocamlCode ()
+      | _ => ()
+      }
     };
     let onReasonChange code _change => compileReason code ();
     let debouncedOnReasonChange = Utils.debounce onReasonChange wait::1000.0;
