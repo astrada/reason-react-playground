@@ -26,7 +26,7 @@ let component = ReasonReact.reducerComponentWithRetainedProps "Preview";
 
 let executeCode (self: ReasonReact.self state retainedProps action) => {
   let code = self.ReasonReact.retainedProps.code;
-  Utils.evalJsSync code (fun evalResult => self.reduce (fun _ => UpdateEvalResult evalResult) ())
+  Utils.evalJs code (fun evalResult => self.reduce (fun _ => UpdateEvalResult evalResult) ())
 };
 
 let make ::code ::className=? _children => {
@@ -35,7 +35,7 @@ let make ::code ::className=? _children => {
   initialState: fun () => {evalResult: Utils.Success, evaluatingJs: false},
   reducer: fun action state =>
     switch action {
-    | UpdateEvalResult evalResult => ReasonReact.Update {...state, evalResult, evaluatingJs: true}
+    | UpdateEvalResult evalResult => ReasonReact.Update {...state, evalResult, evaluatingJs: false}
     },
   didMount: fun self => {
     executeCode self;

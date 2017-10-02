@@ -57,13 +57,25 @@ let make _children => {
   render: fun self => {
     let logo = <Logo />;
     let compileOCaml code event => {
-      Utils.compileOCamlSync
+      Utils.jsxv3Rewrite
         code
         (
-          fun compilerResult => {
-            let reduce = self.reduce (fun _event => UpdateBucklescriptResult compilerResult);
-            reduce event
-          }
+          fun compilerResult =>
+            switch compilerResult {
+            | Utils.OutputCode ocamlCode =>
+              Utils.compileOCaml
+                ocamlCode
+                (
+                  fun compilerResult => {
+                    let reduce =
+                      self.reduce (fun _event => UpdateBucklescriptResult compilerResult);
+                    reduce event
+                  }
+                )
+            | Utils.ErrorMessage _ =>
+              let reduce = self.reduce (fun _event => UpdateBucklescriptResult compilerResult);
+              reduce event
+            }
         );
       let reduce = self.reduce (fun _event => CompileOCaml code);
       reduce event

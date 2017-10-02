@@ -8,14 +8,12 @@ type compilerResult =
 
 let compileReason: string => (compilerResult => unit) => unit;
 
-let compileOCaml: string => (compilerResult => unit) => unit;
+let jsxv3Rewrite: string => (compilerResult => unit) => unit;
 
-let compileOCamlSync: string => (compilerResult => unit) => unit;
+let compileOCaml: string => (compilerResult => unit) => unit;
 
 type evalResult =
   | Success
   | ErrorMessage string;
-
-let evalJsSync: string => (evalResult => unit) => unit;
 
 let evalJs: string => (evalResult => unit) => unit;
