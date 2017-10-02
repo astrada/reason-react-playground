@@ -17,4 +17,6 @@ external ocaml : compiler = "" [@@bs.val];
 
 external compile : compiler => string => string = "" [@@bs.send];
 
-let compile code => Js.Json.parseExn (compile ocaml code);
+external parse : string => compilerResult = "" [@@bs.val] [@@bs.scope "JSON"];
+
+let compile code => parse (compile ocaml code);

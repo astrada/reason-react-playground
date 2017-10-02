@@ -25,43 +25,29 @@ let compileReason code onDone => {
   onDone compilerResult
 };
 
-let jsonToCompilerResult codeFieldName errorFieldName json => {
-  let result = Js.Json.classify json;
-  switch result {
-  | Js.Json.JSONObject resultDict =>
-    switch (Js.Dict.get resultDict codeFieldName) {
-    | Some json =>
-      let outputCode =
-        switch (Js.Json.classify json) {
-        | Js.Json.JSONString c => c
-        | _ => ""
-        };
-      OutputCode outputCode
-    | None =>
-      switch (Js.Dict.get resultDict errorFieldName) {
-      | Some json =>
-        let errorMessage =
-          switch (Js.Json.classify json) {
-          | Js.Json.JSONString em => em
-          | _ => ""
-          };
-        ErrorMessage errorMessage
-      | None => assert false
-      }
-    }
-  | _ => ErrorMessage "Unknown error"
-  }
-};
-
 let jsxv3Rewrite code onDone => {
-  let resultJson = JsxV3.rewrite code;
-  let compilerResult = jsonToCompilerResult "ocaml_code" "ppx_error_msg" resultJson;
+  let result = JsxV3.rewrite code;
+  let outputCode = Js.Nullable.to_opt result##ocaml_code;
+  let errorMessage = Js.Nullable.to_opt result##ppx_error_msg;
+  let compilerResult =
+    switch outputCode {
+    | Some ""
+    | None => ErrorMessage (Js.Option.getWithDefault "" errorMessage)
+    | Some c => OutputCode c
+    };
   onDone compilerResult
 };
 
 let compileOCaml code onDone => {
-  let resultJson = BucklescriptCompiler.compile code;
-  let compilerResult = jsonToCompilerResult "js_code" "js_error_msg" resultJson;
+  let result = BucklescriptCompiler.compile code;
+  let outputCode = Js.Nullable.to_opt result##js_code;
+  let errorMessage = Js.Nullable.to_opt result##js_error_msg;
+  let compilerResult =
+    switch outputCode {
+    | Some ""
+    | None => ErrorMessage (Js.Option.getWithDefault "" errorMessage)
+    | Some c => OutputCode c
+    };
   onDone compilerResult
 };
 

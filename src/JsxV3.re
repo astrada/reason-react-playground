@@ -17,4 +17,6 @@ external jsxv3 : jsxv3 = "" [@@bs.val];
 
 external rewrite : jsxv3 => string => string = "" [@@bs.send];
 
-let rewrite code => Js.Json.parseExn (rewrite jsxv3 code);
+external parse : string => compilerResult = "" [@@bs.val] [@@bs.scope "JSON"];
+
+let rewrite code => parse (rewrite jsxv3 code);
