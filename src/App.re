@@ -2,27 +2,34 @@
 
 external theme : ReactToolbox.ThemeProvider.theme = "./toolbox/theme" [@@bs.module];
 
+let defaultResult = Utils.OutputCode "";
+
+type compilerState = {
+  code: string,
+  result: Utils.compilerResult,
+  compiling: bool
+};
+
 type state = {
-  reasonCode: string,
-  refmtResult: Utils.compilerResult,
-  compilingReason: bool,
-  ocamlCode: string,
-  bucklescriptResult: Utils.compilerResult,
-  compilingOCaml: bool
+  reason: compilerState,
+  jsxv3: compilerState,
+  ocaml: compilerState
 };
 
 type action =
   | CompileReason string
   | UpdateRefmtResult Utils.compilerResult
+  | RewriteJsxV3 string
+  | UpdateJsxV3Result Utils.compilerResult
   | CompileOCaml string
-  | UpdateBucklescriptResult Utils.compilerResult;
+  | UpdateBucklescriptResult Utils.compilerResult
+  | UpdateAll (Utils.compilerResult, Utils.compilerResult, Utils.compilerResult);
 
 let component = ReasonReact.reducerComponent "App";
 
 let test_reason_code = {j|module Greeting = {
   let component = ReasonReact.statelessComponent "Greeting";
 
-  /* underscore before names indicate unused variables. We name them for clarity */
   let make _children => {
     ...component,
     render: fun self => <button> (ReasonReact.stringToElement "Hello!") </button>
@@ -33,61 +40,90 @@ ReactDOMRe.renderToElementWithId <Greeting /> "preview";|j};
 let make _children => {
   ...component,
   initialState: fun () => {
-    reasonCode: test_reason_code,
-    refmtResult: Utils.OutputCode "",
-    compilingReason: false,
-    ocamlCode: "",
-    bucklescriptResult: Utils.OutputCode "",
-    compilingOCaml: false
+    let defaultCompilerState = {code: "", result: defaultResult, compiling: false};
+    {
+      reason: {...defaultCompilerState, code: test_reason_code},
+      jsxv3: defaultCompilerState,
+      ocaml: defaultCompilerState
+    }
   },
-  reducer: fun action state =>
+  reducer: fun action state => {
+    let getCode result =>
+      switch result {
+      | Utils.OutputCode code => code
+      | Utils.ErrorMessage _ => ""
+      };
     switch action {
-    | CompileReason reasonCode => ReasonReact.Update {...state, reasonCode, compilingReason: true}
-    | UpdateRefmtResult refmtResult =>
-      let ocamlCode =
-        switch refmtResult {
-        | Utils.OutputCode code => code
-        | _ => ""
-        };
-      ReasonReact.Update {...state, refmtResult, compilingReason: false, ocamlCode}
-    | CompileOCaml ocamlCode => ReasonReact.Update {...state, ocamlCode, compilingOCaml: true}
-    | UpdateBucklescriptResult bucklescriptResult =>
-      ReasonReact.Update {...state, bucklescriptResult, compilingOCaml: false}
-    },
+    | CompileReason code =>
+      ReasonReact.Update {...state, reason: {...state.reason, code, compiling: true}}
+    | UpdateRefmtResult result =>
+      ReasonReact.Update {
+        ...state,
+        reason: {...state.reason, result, compiling: false},
+        jsxv3: {...state.jsxv3, code: getCode result}
+      }
+    | RewriteJsxV3 code =>
+      ReasonReact.Update {...state, jsxv3: {...state.jsxv3, code, compiling: true}}
+    | UpdateJsxV3Result result =>
+      ReasonReact.Update {
+        ...state,
+        jsxv3: {...state.jsxv3, result, compiling: false},
+        ocaml: {...state.ocaml, code: getCode result}
+      }
+    | CompileOCaml code =>
+      ReasonReact.Update {...state, ocaml: {...state.ocaml, code, compiling: true}}
+    | UpdateBucklescriptResult result =>
+      ReasonReact.Update {...state, ocaml: {...state.ocaml, result, compiling: false}}
+    | UpdateAll (reasonResult, jsxv3Result, ocamlResult) =>
+      ReasonReact.Update {
+        reason: {...state.reason, result: reasonResult, compiling: false},
+        jsxv3: {code: getCode reasonResult, result: jsxv3Result, compiling: false},
+        ocaml: {code: getCode jsxv3Result, result: ocamlResult, compiling: false}
+      }
+    }
+  },
   render: fun self => {
     let logo = <Logo />;
-    let compileOCaml code event => {
+    let compileOCaml2Js code => {
+      let ocamlResult = Utils.compileOCaml code;
+      (self.state.reason.result, self.state.jsxv3.result, ocamlResult)
+    };
+    let rewriteOCaml2Js code => {
       let rewriteResult = Utils.jsxv3Rewrite code;
-      switch rewriteResult {
-      | Utils.OutputCode ocamlCode =>
-        let compilerResult = Utils.compileOCaml ocamlCode;
-        let reduce = self.reduce (fun _event => UpdateBucklescriptResult compilerResult);
-        reduce event
-      | Utils.ErrorMessage _ =>
-        let reduce = self.reduce (fun _event => UpdateBucklescriptResult rewriteResult);
-        reduce event
-      }
+      let ocamlResult =
+        switch rewriteResult {
+        | Utils.OutputCode ocamlCode => Utils.compileOCaml ocamlCode
+        | Utils.ErrorMessage _ => defaultResult
+        };
+      (self.state.reason.result, rewriteResult, ocamlResult)
     };
-    let compileReason code event => {
-      let compilerResult = Utils.compileReason code;
-      let reduce = self.reduce (fun _event => UpdateRefmtResult compilerResult);
-      reduce event;
-      switch compilerResult {
-      | Utils.OutputCode ocamlCode => compileOCaml ocamlCode ()
-      | _ => ()
-      }
+    let compileReason2Js code => {
+      let reasonResult = Utils.compileReason code;
+      let (rewriteResult, ocamlResult) =
+        switch reasonResult {
+        | Utils.OutputCode jsxv3Code =>
+          let (_, rewriteResult, ocamlResult) = rewriteOCaml2Js jsxv3Code;
+          (rewriteResult, ocamlResult)
+        | Utils.ErrorMessage _ => (defaultResult, defaultResult)
+        };
+      (reasonResult, rewriteResult, ocamlResult)
     };
-    let onReasonChange code _change => compileReason code ();
-    let debouncedOnReasonChange = Utils.debounce onReasonChange wait::1000.0;
-    let onOCamlChange code _change => compileOCaml code ();
-    let debouncedOnOCamlChange = Utils.debounce onOCamlChange wait::1000.0;
+    let onReasonChange code _change =>
+      self.reduce (fun _event => UpdateAll (compileReason2Js code)) ();
+    let debouncedOnReasonChange = Utils.debounce onReasonChange wait::250.0;
+    let onOCamlJsxChange code _change =>
+      self.reduce (fun _event => UpdateAll (rewriteOCaml2Js code)) ();
+    let debouncedOnOCamlJsxChange = Utils.debounce onOCamlJsxChange wait::250.0;
+    let onOCamlChange code _change =>
+      self.reduce (fun _event => UpdateAll (compileOCaml2Js code)) ();
+    let debouncedOnOCamlChange = Utils.debounce onOCamlChange wait::250.0;
     let getError compilerResult =>
       switch compilerResult {
       | Utils.OutputCode _ => None
       | Utils.ErrorMessage e => Some e
       };
     let (jsCode, jsErrorMessage) =
-      switch self.state.bucklescriptResult {
+      switch self.state.ocaml.result {
       | Utils.OutputCode jsCode => (jsCode, "")
       | Utils.ErrorMessage errorMessage => ("", errorMessage)
       };
@@ -98,30 +134,23 @@ let make _children => {
           <CodeEditor
             label="Reason"
             mode="rust"
-            code=self.state.reasonCode
-            error=?(getError self.state.refmtResult)
+            code=self.state.reason.code
+            error=?(getError self.state.reason.result)
             onChange=debouncedOnReasonChange
           />
-          <ReactToolbox.Button
-            label="Compile"
-            primary=true
-            raised=true
-            onClick=(compileReason self.state.reasonCode)
-            disabled=self.state.compilingReason
+          <CodeEditor
+            label="OCaml+JSX"
+            mode="mllike"
+            code=self.state.jsxv3.code
+            error=?(getError self.state.jsxv3.result)
+            onChange=debouncedOnOCamlJsxChange
           />
           <CodeEditor
             label="OCaml"
             mode="mllike"
-            code=self.state.ocamlCode
-            error=?(getError self.state.bucklescriptResult)
+            code=self.state.ocaml.code
+            error=?(getError self.state.ocaml.result)
             onChange=debouncedOnOCamlChange
-          />
-          <ReactToolbox.Button
-            label="Compile"
-            primary=true
-            raised=true
-            onClick=(compileOCaml self.state.ocamlCode)
-            disabled=self.state.compilingOCaml
           />
           <ReactToolbox.Input
             _type="text"
