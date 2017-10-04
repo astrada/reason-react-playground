@@ -7,7 +7,7 @@
   "license": "MIT",
   "dependencies": {
     "@skidding/react-codemirror": "^1.0.1",
-    "codemirror": "^5.29.0",
+    "codemirror": "5.29.0",
     "lodash.debounce": "^4.0.8",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
