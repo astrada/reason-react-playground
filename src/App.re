@@ -27,7 +27,7 @@ type action =
 
 let component = ReasonReact.reducerComponent "App";
 
-let test_reason_code = {j|module Greeting = {
+let initialReasonCode = {j|module Greeting = {
   let component = ReasonReact.statelessComponent "Greeting";
 
   let make _children => {
@@ -35,24 +35,36 @@ let test_reason_code = {j|module Greeting = {
     render: fun self => <button> (ReasonReact.stringToElement "Hello!") </button>
   };
 };
+
 ReactDOMRe.renderToElementWithId <Greeting /> "preview";|j};
+
+let getCode result =>
+  switch result {
+  | Utils.OutputCode code => code
+  | Utils.ErrorMessage _ => ""
+  };
+
+let initialReasonResult = Utils.compileReason initialReasonCode;
+
+let initialJsxV2Code = getCode initialReasonResult;
+
+let initialJsxV2Result = Utils.jsxv2Rewrite initialJsxV2Code;
+
+let initialOCamlCode = getCode initialJsxV2Result;
+
+let initialOCamlResult = Utils.compileOCaml initialOCamlCode;
 
 let make _children => {
   ...component,
   initialState: fun () => {
     let defaultCompilerState = {code: "", result: defaultResult, compiling: false};
     {
-      reason: {...defaultCompilerState, code: test_reason_code},
-      jsxv2: defaultCompilerState,
-      ocaml: defaultCompilerState
+      reason: {...defaultCompilerState, code: initialReasonCode},
+      jsxv2: {...defaultCompilerState, code: initialJsxV2Code, result: initialJsxV2Result},
+      ocaml: {...defaultCompilerState, code: initialOCamlCode, result: initialOCamlResult}
     }
   },
-  reducer: fun action state => {
-    let getCode result =>
-      switch result {
-      | Utils.OutputCode code => code
-      | Utils.ErrorMessage _ => ""
-      };
+  reducer: fun action state =>
     switch action {
     | CompileReason code =>
       ReasonReact.Update {...state, reason: {...state.reason, code, compiling: true}}
@@ -80,8 +92,7 @@ let make _children => {
         jsxv2: {code: getCode reasonResult, result: jsxv2Result, compiling: false},
         ocaml: {code: getCode jsxv2Result, result: ocamlResult, compiling: false}
       }
-    }
-  },
+    },
   render: fun self => {
     let logo = <Logo />;
     let compileOCaml2Js code => {
