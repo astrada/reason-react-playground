@@ -12,15 +12,15 @@ type compilerState = {
 
 type state = {
   reason: compilerState,
-  jsxv3: compilerState,
+  jsxv2: compilerState,
   ocaml: compilerState
 };
 
 type action =
   | CompileReason string
   | UpdateRefmtResult Utils.compilerResult
-  | RewriteJsxV3 string
-  | UpdateJsxV3Result Utils.compilerResult
+  | RewriteJsxV2 string
+  | UpdateJsxV2Result Utils.compilerResult
   | CompileOCaml string
   | UpdateBucklescriptResult Utils.compilerResult
   | UpdateAll (Utils.compilerResult, Utils.compilerResult, Utils.compilerResult);
@@ -43,7 +43,7 @@ let make _children => {
     let defaultCompilerState = {code: "", result: defaultResult, compiling: false};
     {
       reason: {...defaultCompilerState, code: test_reason_code},
-      jsxv3: defaultCompilerState,
+      jsxv2: defaultCompilerState,
       ocaml: defaultCompilerState
     }
   },
@@ -60,25 +60,25 @@ let make _children => {
       ReasonReact.Update {
         ...state,
         reason: {...state.reason, result, compiling: false},
-        jsxv3: {...state.jsxv3, code: getCode result}
+        jsxv2: {...state.jsxv2, code: getCode result}
       }
-    | RewriteJsxV3 code =>
-      ReasonReact.Update {...state, jsxv3: {...state.jsxv3, code, compiling: true}}
-    | UpdateJsxV3Result result =>
+    | RewriteJsxV2 code =>
+      ReasonReact.Update {...state, jsxv2: {...state.jsxv2, code, compiling: true}}
+    | UpdateJsxV2Result result =>
       ReasonReact.Update {
         ...state,
-        jsxv3: {...state.jsxv3, result, compiling: false},
+        jsxv2: {...state.jsxv2, result, compiling: false},
         ocaml: {...state.ocaml, code: getCode result}
       }
     | CompileOCaml code =>
       ReasonReact.Update {...state, ocaml: {...state.ocaml, code, compiling: true}}
     | UpdateBucklescriptResult result =>
       ReasonReact.Update {...state, ocaml: {...state.ocaml, result, compiling: false}}
-    | UpdateAll (reasonResult, jsxv3Result, ocamlResult) =>
+    | UpdateAll (reasonResult, jsxv2Result, ocamlResult) =>
       ReasonReact.Update {
         reason: {...state.reason, result: reasonResult, compiling: false},
-        jsxv3: {code: getCode reasonResult, result: jsxv3Result, compiling: false},
-        ocaml: {code: getCode jsxv3Result, result: ocamlResult, compiling: false}
+        jsxv2: {code: getCode reasonResult, result: jsxv2Result, compiling: false},
+        ocaml: {code: getCode jsxv2Result, result: ocamlResult, compiling: false}
       }
     }
   },
@@ -86,10 +86,10 @@ let make _children => {
     let logo = <Logo />;
     let compileOCaml2Js code => {
       let ocamlResult = Utils.compileOCaml code;
-      (self.state.reason.result, self.state.jsxv3.result, ocamlResult)
+      (self.state.reason.result, self.state.jsxv2.result, ocamlResult)
     };
     let rewriteOCaml2Js code => {
-      let rewriteResult = Utils.jsxv3Rewrite code;
+      let rewriteResult = Utils.jsxv2Rewrite code;
       let ocamlResult =
         switch rewriteResult {
         | Utils.OutputCode ocamlCode => Utils.compileOCaml ocamlCode
@@ -101,8 +101,8 @@ let make _children => {
       let reasonResult = Utils.compileReason code;
       let (rewriteResult, ocamlResult) =
         switch reasonResult {
-        | Utils.OutputCode jsxv3Code =>
-          let (_, rewriteResult, ocamlResult) = rewriteOCaml2Js jsxv3Code;
+        | Utils.OutputCode jsxv2Code =>
+          let (_, rewriteResult, ocamlResult) = rewriteOCaml2Js jsxv2Code;
           (rewriteResult, ocamlResult)
         | Utils.ErrorMessage _ => (defaultResult, defaultResult)
         };
@@ -141,8 +141,8 @@ let make _children => {
           <CodeEditor
             label="OCaml+JSX"
             mode="mllike"
-            code=self.state.jsxv3.code
-            error=?(getError self.state.jsxv3.result)
+            code=self.state.jsxv2.code
+            error=?(getError self.state.jsxv2.result)
             onChange=debouncedOnOCamlJsxChange
           />
           <CodeEditor

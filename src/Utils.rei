@@ -8,7 +8,7 @@ type compilerResult =
 
 let compileReason: string => compilerResult;
 
-let jsxv3Rewrite: string => compilerResult;
+let jsxv2Rewrite: string => compilerResult;
 
 let compileOCaml: string => compilerResult;
 

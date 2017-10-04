@@ -1,4 +1,4 @@
-type jsxv3;
+type jsxv2;
 
 type compilerResult =
   Js.t {
@@ -13,10 +13,10 @@ type compilerResult =
     _type : Js.nullable string
   };
 
-external jsxv3 : jsxv3 = "" [@@bs.val];
+external jsxv2 : jsxv2 = "" [@@bs.val];
 
-external rewrite : jsxv3 => string => string = "" [@@bs.send];
+external rewrite : jsxv2 => string => string = "" [@@bs.send];
 
 external parse : string => compilerResult = "" [@@bs.val] [@@bs.scope "JSON"];
 
-let rewrite code => parse (rewrite jsxv3 code);
+let rewrite code => parse (rewrite jsxv2 code);

@@ -23,8 +23,8 @@ let compileReason code => {
   }
 };
 
-let jsxv3Rewrite code => {
-  let result = JsxV3.rewrite code;
+let jsxv2Rewrite code => {
+  let result = JsxV2.rewrite code;
   let outputCode = Js.Nullable.to_opt result##ocaml_code;
   let errorMessage = Js.Nullable.to_opt result##ppx_error_msg;
   switch outputCode {
