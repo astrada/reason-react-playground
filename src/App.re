@@ -124,8 +124,8 @@ let make _children => {
       };
     let (jsCode, jsErrorMessage) =
       switch self.state.ocaml.result {
-      | Utils.OutputCode jsCode => (jsCode, "")
-      | Utils.ErrorMessage errorMessage => ("", errorMessage)
+      | Utils.OutputCode jsCode => (jsCode, None)
+      | Utils.ErrorMessage errorMessage => ("", Some errorMessage)
       };
     <ReactToolbox.ThemeProvider theme>
       <div>
@@ -152,11 +152,12 @@ let make _children => {
             error=?(getError self.state.ocaml.result)
             onChange=debouncedOnOCamlChange
           />
-          <ReactToolbox.Input
-            _type="text"
-            multiline=true
-            label=(ReasonReact.stringToElement "JS")
-            value=(jsCode ^ jsErrorMessage)
+          <CodeEditor
+            label="JS"
+            mode="javascript"
+            code=jsCode
+            error=?jsErrorMessage
+            readOnly=true
           />
           <Preview code=jsCode />
         </section>

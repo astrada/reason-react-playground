@@ -1,7 +1,5 @@
 let component = ReasonReact.statelessComponent "CodeEditor";
 
-let options = {"lineNumbers": Js.Boolean.to_js_boolean true};
-
 let rowStyle =
   ReactDOMRe.Style.make
     flex::"1"
@@ -34,18 +32,19 @@ let errorBodyStyle = ReactDOMRe.Style.make fontFamily::"monospace" fontSize::"12
 
 let errorStyle = ReactDOMRe.Style.make backgroundColor::"#faa" padding::"10px 20px" ();
 
-let make ::label ::mode ::code=? ::error=? ::onChange=? _children => {
+let make ::label ::mode ::code=? ::error=? ::onChange=? ::readOnly=? _children => {
   ...component,
   render: fun _self => {
-    let optionsWithMode = Js.Obj.assign options {"mode": mode};
+    let options = {"lineNumbers": Js.Boolean.to_js_boolean true};
+    let options = Js.Obj.assign options {"mode": mode};
+    let options =
+      switch readOnly {
+      | Some ro => Js.Obj.assign options {"readOnly": Js.Boolean.to_js_boolean ro}
+      | None => options
+      };
     <div style=rowStyle>
       <div style=labelStyle> (ReasonReact.stringToElement label) </div>
-      <CodeMirror
-        value=?code
-        onChange=?onChange
-        options=optionsWithMode
-        preservePositionScroll=true
-      />
+      <CodeMirror value=?code onChange=?onChange options preservePositionScroll=true />
       <Error errorMessage=?error />
     </div>
   }

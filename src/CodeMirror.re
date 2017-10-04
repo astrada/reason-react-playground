@@ -2,6 +2,8 @@
 
 external reactClass : ReasonReact.reactClass = "@skidding/react-codemirror" [@@bs.module];
 
+[%bs.raw {|require('codemirror/mode/javascript/javascript')|}];
+
 [%bs.raw {|require('codemirror/mode/mllike/mllike')|}];
 
 [%bs.raw {|require('codemirror/mode/rust/rust')|}];
