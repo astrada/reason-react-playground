@@ -57,3 +57,13 @@ let evalJs code => {
   | Some em => ErrorMessage em
   }
 };
+
+external location : Dom.location = "" [@@bs.val] [@@bs.scope "window"];
+
+external setLocationHref : Dom.location => string => unit = "href" [@@bs.set];
+
+external openWindow : string => string => unit = "open" [@@bs.val] [@@bs.scope "window"];
+
+let redirect url => setLocationHref location url;
+
+let openWindow ::target="_blank" url => openWindow url target;

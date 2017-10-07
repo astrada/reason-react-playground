@@ -7,13 +7,15 @@ let defaultResult = Utils.OutputCode "";
 type compilerState = {
   code: string,
   result: Utils.compilerResult,
-  compiling: bool
+  compiling: bool,
+  show: bool
 };
 
 type state = {
   reason: compilerState,
   jsxv2: compilerState,
-  ocaml: compilerState
+  ocaml: compilerState,
+  showJs: bool
 };
 
 type action =
@@ -23,7 +25,11 @@ type action =
   | UpdateJsxV2Result Utils.compilerResult
   | CompileOCaml string
   | UpdateBucklescriptResult Utils.compilerResult
-  | UpdateAll (Utils.compilerResult, Utils.compilerResult, Utils.compilerResult);
+  | UpdateAll (Utils.compilerResult, Utils.compilerResult, Utils.compilerResult)
+  | ToggleJsxV2
+  | ToggleOCaml
+  | ToggleJs
+  | ShowJs;
 
 let component = ReasonReact.reducerComponent "App";
 
@@ -44,6 +50,18 @@ let getCode result =>
   | Utils.ErrorMessage _ => ""
   };
 
+let getError compilerResult =>
+  switch compilerResult {
+  | Utils.OutputCode _ => None
+  | Utils.ErrorMessage e => Some e
+  };
+
+let hasError compilerResult =>
+  switch compilerResult {
+  | Utils.OutputCode _ => false
+  | Utils.ErrorMessage _ => true
+  };
+
 let initialReasonResult = Utils.compileReason initialReasonCode;
 
 let initialJsxV2Code = getCode initialReasonResult;
@@ -57,11 +75,12 @@ let initialOCamlResult = Utils.compileOCaml initialOCamlCode;
 let make _children => {
   ...component,
   initialState: fun () => {
-    let defaultCompilerState = {code: "", result: defaultResult, compiling: false};
+    let defaultCompilerState = {code: "", result: defaultResult, compiling: false, show: false};
     {
-      reason: {...defaultCompilerState, code: initialReasonCode},
+      reason: {...defaultCompilerState, code: initialReasonCode, show: true},
       jsxv2: {...defaultCompilerState, code: initialJsxV2Code, result: initialJsxV2Result},
-      ocaml: {...defaultCompilerState, code: initialOCamlCode, result: initialOCamlResult}
+      ocaml: {...defaultCompilerState, code: initialOCamlCode, result: initialOCamlResult},
+      showJs: false
     }
   },
   reducer: fun action state =>
@@ -87,14 +106,46 @@ let make _children => {
     | UpdateBucklescriptResult result =>
       ReasonReact.Update {...state, ocaml: {...state.ocaml, result, compiling: false}}
     | UpdateAll (reasonResult, jsxv2Result, ocamlResult) =>
+      let jsxv2Code = getCode reasonResult;
+      let jsxv2Code =
+        if (jsxv2Code == "") {
+          state.jsxv2.code
+        } else {
+          jsxv2Code
+        };
+      let ocamlCode = getCode jsxv2Result;
+      let ocamlCode =
+        if (ocamlCode == "") {
+          state.ocaml.code
+        } else {
+          ocamlCode
+        };
       ReasonReact.Update {
+        ...state,
         reason: {...state.reason, result: reasonResult, compiling: false},
-        jsxv2: {code: getCode reasonResult, result: jsxv2Result, compiling: false},
-        ocaml: {code: getCode jsxv2Result, result: ocamlResult, compiling: false}
+        jsxv2: {
+          code: jsxv2Code,
+          result: jsxv2Result,
+          compiling: false,
+          show: state.jsxv2.show || hasError jsxv2Result
+        },
+        ocaml: {
+          code: ocamlCode,
+          result: ocamlResult,
+          compiling: false,
+          show: state.ocaml.show || hasError ocamlResult
+        }
       }
+    | ToggleJsxV2 =>
+      ReasonReact.Update {...state, jsxv2: {...state.jsxv2, show: not state.jsxv2.show}}
+    | ToggleOCaml =>
+      ReasonReact.Update {...state, ocaml: {...state.ocaml, show: not state.ocaml.show}}
+    | ToggleJs => ReasonReact.Update {...state, showJs: not state.showJs}
+    | ShowJs => ReasonReact.Update {...state, showJs: true}
     },
   render: fun self => {
     let logo = <Logo />;
+    let githubIcon = <GithubIcon />;
     let compileOCaml2Js code => {
       let ocamlResult = Utils.compileOCaml code;
       (self.state.reason.result, self.state.jsxv2.result, ocamlResult)
@@ -128,19 +179,43 @@ let make _children => {
     let onOCamlChange code _change =>
       self.reduce (fun _event => UpdateAll (compileOCaml2Js code)) ();
     let debouncedOnOCamlChange = Utils.debounce onOCamlChange wait::250.0;
-    let getError compilerResult =>
-      switch compilerResult {
-      | Utils.OutputCode _ => None
-      | Utils.ErrorMessage e => Some e
-      };
     let (jsCode, jsErrorMessage) =
       switch self.state.ocaml.result {
       | Utils.OutputCode jsCode => (jsCode, None)
       | Utils.ErrorMessage errorMessage => ("", Some errorMessage)
       };
+    let buildCodeEditor compilerState label mode onChange =>
+      if compilerState.show {
+        <CodeEditor
+          label
+          mode
+          code=compilerState.code
+          error=?(getError compilerState.result)
+          onChange
+        />
+      } else {
+        ReasonReact.nullElement
+      };
+    let jsxv2CodeEditor =
+      buildCodeEditor self.state.jsxv2 "OCaml+JSX" "mllike" debouncedOnOCamlJsxChange;
+    let ocamlCodeEditor = buildCodeEditor self.state.ocaml "OCaml" "mllike" debouncedOnOCamlChange;
+    let jsCodeEditor =
+      if self.state.showJs {
+        <CodeEditor label="JS" mode="javascript" code=jsCode error=?jsErrorMessage readOnly=true />
+      } else {
+        ReasonReact.nullElement
+      };
     <ReactToolbox.ThemeProvider theme>
       <div>
-        <ReactToolbox.AppBar title="Reason React Playground" leftIcon=logo />
+        <ReactToolbox.AppBar
+          title="Reason React Playground"
+          leftIcon=logo
+          onLeftIconClick=(fun _event => Utils.redirect "/")
+          rightIcon=githubIcon
+          onRightIconClick=(
+            fun _event => Utils.openWindow "https://github.com/astrada/reason-react-playground/"
+          )
+        />
         <section>
           <CodeEditor
             label="Reason"
@@ -149,28 +224,33 @@ let make _children => {
             error=?(getError self.state.reason.result)
             onChange=debouncedOnReasonChange
           />
-          <CodeEditor
-            label="OCaml+JSX"
-            mode="mllike"
-            code=self.state.jsxv2.code
-            error=?(getError self.state.jsxv2.result)
-            onChange=debouncedOnOCamlJsxChange
+          <ReactToolbox.Checkbox
+            checked=self.state.jsxv2.show
+            label=(ReasonReact.stringToElement "Show OCaml+JSX")
+            onChange=(fun _checked event => self.reduce (fun _event => ToggleJsxV2) event)
           />
-          <CodeEditor
-            label="OCaml"
-            mode="mllike"
-            code=self.state.ocaml.code
-            error=?(getError self.state.ocaml.result)
-            onChange=debouncedOnOCamlChange
+          jsxv2CodeEditor
+          <ReactToolbox.Checkbox
+            checked=self.state.ocaml.show
+            label=(ReasonReact.stringToElement "Show OCaml")
+            onChange=(fun _checked event => self.reduce (fun _event => ToggleOCaml) event)
           />
-          <CodeEditor
-            label="JS"
-            mode="javascript"
+          ocamlCodeEditor
+          <ReactToolbox.Checkbox
+            checked=self.state.showJs
+            label=(ReasonReact.stringToElement "Show JS")
+            onChange=(fun _checked event => self.reduce (fun _event => ToggleJs) event)
+          />
+          jsCodeEditor
+          <Preview
             code=jsCode
-            error=?jsErrorMessage
-            readOnly=true
+            onDone=(
+              fun error =>
+                if error {
+                  self.reduce (fun _ => ShowJs) ()
+                }
+            )
           />
-          <Preview code=jsCode />
         </section>
       </div>
     </ReactToolbox.ThemeProvider>

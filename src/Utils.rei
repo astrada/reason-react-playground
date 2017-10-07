@@ -17,3 +17,7 @@ type evalResult =
   | ErrorMessage string;
 
 let evalJs: string => evalResult;
+
+let redirect: string => unit;
+
+let openWindow: target::string? => string => unit;

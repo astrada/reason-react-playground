@@ -1,5 +1,5 @@
 /* Based on https://github.com/react-toolbox/react-toolbox/blob/dev/docs/app/components/preview/index.js */
-let previewStyle =
+let previewContainerStyle =
   ReactDOMRe.Style.make
     display::"flex"
     flexDirection::"column"
@@ -7,8 +7,9 @@ let previewStyle =
     border::"1px solid #aaa"
     position::"relative"
     overflow::"auto"
-    margin::"20px 0 20px 0"
     ();
+
+let previewStyle = ReactDOMRe.Style.make padding::"10px" ();
 
 let contentStyle = ReactDOMRe.Style.make flexGrow::"1" margin::"10px" ();
 
@@ -30,13 +31,24 @@ let executeCode (self: ReasonReact.self state retainedProps action) => {
   self.reduce (fun _ => UpdateEvalResult evalResult) ()
 };
 
-let make ::code ::className=? _children => {
+let make ::code ::className=? onDone::(onDone: option (bool => unit))=? _children => {
   ...component,
   retainedProps: {code: code},
   initialState: fun () => {evalResult: Utils.Success, evaluatingJs: false},
   reducer: fun action state =>
     switch action {
-    | UpdateEvalResult evalResult => ReasonReact.Update {...state, evalResult, evaluatingJs: false}
+    | UpdateEvalResult evalResult =>
+      ReasonReact.UpdateWithSideEffects
+        {...state, evalResult, evaluatingJs: false}
+        (
+          fun self => {
+            let error = self.state.evalResult != Utils.Success;
+            switch onDone {
+            | Some onDone => onDone error
+            | None => ()
+            }
+          }
+        )
     },
   didMount: fun self => {
     executeCode self;
@@ -53,8 +65,8 @@ let make ::code ::className=? _children => {
       | Utils.Success => None
       | Utils.ErrorMessage e => Some e
       };
-    <div className style=previewStyle>
-      <div id="preview" />
+    <div className style=previewContainerStyle>
+      <div id="preview" style=previewStyle />
       <Error errorMessage=?errorMessage />
     </div>
   }
