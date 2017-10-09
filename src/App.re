@@ -25,7 +25,7 @@ type action =
   | UpdateJsxV2Result Utils.compilerResult
   | CompileOCaml string
   | UpdateBucklescriptResult Utils.compilerResult
-  | UpdateAll (Utils.compilerResult, Utils.compilerResult, Utils.compilerResult)
+  | UpdateAll (string, Utils.compilerResult, Utils.compilerResult, Utils.compilerResult)
   | ToggleJsxV2
   | ToggleOCaml
   | ToggleJs
@@ -62,7 +62,7 @@ let hasError compilerResult =>
   | Utils.ErrorMessage _ => true
   };
 
-let initialReasonResult = Utils.compileReason initialReasonCode;
+let initialReasonResult = Utils.refmtRE2ML initialReasonCode;
 
 let initialJsxV2Code = getCode initialReasonResult;
 
@@ -105,7 +105,7 @@ let make _children => {
       ReasonReact.Update {...state, ocaml: {...state.ocaml, code, compiling: true}}
     | UpdateBucklescriptResult result =>
       ReasonReact.Update {...state, ocaml: {...state.ocaml, result, compiling: false}}
-    | UpdateAll (reasonResult, jsxv2Result, ocamlResult) =>
+    | UpdateAll (reasonCode, reasonResult, jsxv2Result, ocamlResult) =>
       let jsxv2Code = getCode reasonResult;
       let jsxv2Code =
         if (jsxv2Code == "") {
@@ -122,7 +122,7 @@ let make _children => {
         };
       ReasonReact.Update {
         ...state,
-        reason: {...state.reason, result: reasonResult, compiling: false},
+        reason: {...state.reason, code: reasonCode, result: reasonResult, compiling: false},
         jsxv2: {
           code: jsxv2Code,
           result: jsxv2Result,
@@ -146,11 +146,7 @@ let make _children => {
   render: fun self => {
     let logo = <Logo />;
     let githubIcon = <GithubIcon />;
-    let compileOCaml2Js code => {
-      let ocamlResult = Utils.compileOCaml code;
-      (self.state.reason.result, self.state.jsxv2.result, ocamlResult)
-    };
-    let rewriteOCaml2Js code => {
+    let rewriteJsxV2 code => {
       let rewriteResult = Utils.jsxv2Rewrite code;
       let ocamlResult =
         switch rewriteResult {
@@ -159,46 +155,54 @@ let make _children => {
         };
       (self.state.reason.result, rewriteResult, ocamlResult)
     };
-    let compileReason2Js code => {
-      let reasonResult = Utils.compileReason code;
+    let refmtRE2ML code => {
+      let reasonResult = Utils.refmtRE2ML code;
       let (rewriteResult, ocamlResult) =
         switch reasonResult {
         | Utils.OutputCode jsxv2Code =>
-          let (_, rewriteResult, ocamlResult) = rewriteOCaml2Js jsxv2Code;
+          let (_, rewriteResult, ocamlResult) = rewriteJsxV2 jsxv2Code;
           (rewriteResult, ocamlResult)
         | Utils.ErrorMessage _ => (defaultResult, defaultResult)
         };
-      (reasonResult, rewriteResult, ocamlResult)
+      (self.state.reason.code, reasonResult, rewriteResult, ocamlResult)
     };
-    let onReasonChange code _change =>
-      self.reduce (fun _event => UpdateAll (compileReason2Js code)) ();
+    let refmtML2RE code => {
+      let (_, rewriteResult, ocamlResult) = rewriteJsxV2 code;
+      let reasonResult = Utils.refmtML2RE code;
+      let reasonCode =
+        switch reasonResult {
+        | Utils.OutputCode code => code
+        | Utils.ErrorMessage _ => self.state.reason.code
+        };
+      (reasonCode, self.state.reason.result, rewriteResult, ocamlResult)
+    };
+    let onReasonChange code _change => self.reduce (fun _event => UpdateAll (refmtRE2ML code)) ();
     let debouncedOnReasonChange = Utils.debounce onReasonChange wait::250.0;
     let onOCamlJsxChange code _change =>
-      self.reduce (fun _event => UpdateAll (rewriteOCaml2Js code)) ();
+      self.reduce (fun _event => UpdateAll (refmtML2RE code)) ();
     let debouncedOnOCamlJsxChange = Utils.debounce onOCamlJsxChange wait::250.0;
-    let onOCamlChange code _change =>
-      self.reduce (fun _event => UpdateAll (compileOCaml2Js code)) ();
-    let debouncedOnOCamlChange = Utils.debounce onOCamlChange wait::250.0;
     let (jsCode, jsErrorMessage) =
       switch self.state.ocaml.result {
       | Utils.OutputCode jsCode => (jsCode, None)
       | Utils.ErrorMessage errorMessage => ("", Some errorMessage)
       };
-    let buildCodeEditor compilerState label mode onChange =>
+    let buildCodeEditor ::onChange=? compilerState label mode =>
       if compilerState.show {
+        let readOnly = Js.Option.isNone onChange;
         <CodeEditor
           label
           mode
           code=compilerState.code
           error=?(getError compilerState.result)
-          onChange
+          onChange=?onChange
+          readOnly
         />
       } else {
         ReasonReact.nullElement
       };
     let jsxv2CodeEditor =
-      buildCodeEditor self.state.jsxv2 "OCaml+JSX" "mllike" debouncedOnOCamlJsxChange;
-    let ocamlCodeEditor = buildCodeEditor self.state.ocaml "OCaml" "mllike" debouncedOnOCamlChange;
+      buildCodeEditor onChange::debouncedOnOCamlJsxChange self.state.jsxv2 "OCaml+JSX" "mllike";
+    let ocamlCodeEditor = buildCodeEditor self.state.ocaml "OCaml" "mllike";
     let jsCodeEditor =
       if self.state.showJs {
         <CodeEditor label="JS" mode="javascript" code=jsCode error=?jsErrorMessage readOnly=true />
@@ -232,13 +236,13 @@ let make _children => {
           jsxv2CodeEditor
           <ReactToolbox.Checkbox
             checked=self.state.ocaml.show
-            label=(ReasonReact.stringToElement "Show OCaml")
+            label=(ReasonReact.stringToElement "Show OCaml (read-only)")
             onChange=(fun _checked event => self.reduce (fun _event => ToggleOCaml) event)
           />
           ocamlCodeEditor
           <ReactToolbox.Checkbox
             checked=self.state.showJs
-            label=(ReasonReact.stringToElement "Show JS")
+            label=(ReasonReact.stringToElement "Show JS (read-only)")
             onChange=(fun _checked event => self.reduce (fun _event => ToggleJs) event)
           />
           jsCodeEditor

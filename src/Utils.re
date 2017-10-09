@@ -12,14 +12,19 @@ type compilerResult =
   | OutputCode string
   | ErrorMessage string;
 
-let compileReason code => {
-  let result = Refmt.refmt code;
-  let outputCode = result##ocamlCode;
-  let errorMessage = result##errorMessage;
-  if (errorMessage == "") {
-    OutputCode outputCode
-  } else {
-    ErrorMessage errorMessage
+let refmtRE2ML code => {
+  let result = Refmt.refmtRE2ML code;
+  switch result.errorMessage {
+  | Some errorMessage => ErrorMessage errorMessage
+  | None => OutputCode (Js.Option.getWithDefault "" result.ocamlCode)
+  }
+};
+
+let refmtML2RE code => {
+  let result = Refmt.refmtML2RE code;
+  switch result.errorMessage {
+  | Some errorMessage => ErrorMessage errorMessage
+  | None => OutputCode (Js.Option.getWithDefault "" result.reasonCode)
   }
 };
 

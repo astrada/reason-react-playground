@@ -1,18 +1,35 @@
-type compilerResult = Js.t {. ocamlCode : string, errorMessage : string};
+type refmtResult = {
+  ocamlCode: option string,
+  reasonCode: option string,
+  errorMessage: option string
+};
 
 external refmt : string => string => string => string => array string = "" [@@bs.val];
 
 external get : array string => int => string = "" [@@bs.get_index];
 
-let refmt code => {
+let refmtRE2ML code => {
   let converted = refmt code "RE" "implementation" "ML";
   if (get converted 0 == "REtoML") {
-    {"ocamlCode": get converted 1, "errorMessage": ""}
+    {ocamlCode: Some (get converted 1), reasonCode: None, errorMessage: None}
   } else if (
     get converted 1 == ""
   ) {
-    {"ocamlCode": "", "errorMessage": "Syntax error"}
+    {ocamlCode: None, reasonCode: None, errorMessage: Some "Syntax error"}
   } else {
-    {"ocamlCode": "", "errorMessage": get converted 1}
+    {ocamlCode: None, reasonCode: None, errorMessage: Some (get converted 1)}
+  }
+};
+
+let refmtML2RE code => {
+  let converted = refmt code "ML" "implementation" "RE";
+  if (get converted 0 == "MLtoRE") {
+    {ocamlCode: None, reasonCode: Some (get converted 1), errorMessage: None}
+  } else if (
+    get converted 1 == ""
+  ) {
+    {ocamlCode: None, reasonCode: None, errorMessage: Some "Syntax error"}
+  } else {
+    {ocamlCode: None, reasonCode: None, errorMessage: Some (get converted 1)}
   }
 };

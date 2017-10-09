@@ -6,7 +6,9 @@ type compilerResult =
   | OutputCode string
   | ErrorMessage string;
 
-let compileReason: string => compilerResult;
+let refmtRE2ML: string => compilerResult;
+
+let refmtML2RE: string => compilerResult;
 
 let jsxv2Rewrite: string => compilerResult;
 

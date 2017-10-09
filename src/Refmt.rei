@@ -1,3 +1,9 @@
-type compilerResult = Js.t {. ocamlCode : string, errorMessage : string};
+type refmtResult = {
+  ocamlCode: option string,
+  reasonCode: option string,
+  errorMessage: option string
+};
 
-let refmt: string => compilerResult;
+let refmtRE2ML: string => refmtResult;
+
+let refmtML2RE: string => refmtResult;
