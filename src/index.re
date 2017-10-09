@@ -2,4 +2,4 @@ external register_service_worker : unit => unit = "default" [@@bs.module "./regi
 
 ReactDOMRe.renderToElementWithId <App /> "root";
 
-register_service_worker ();
+/*register_service_worker ();*/
