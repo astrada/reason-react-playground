@@ -214,7 +214,7 @@ let make _children => {
         <ReactToolbox.AppBar
           title="Reason React Playground"
           leftIcon=logo
-          onLeftIconClick=(fun _event => Utils.redirect "/")
+          onLeftIconClick=(fun _event => Utils.redirect "https://astrada.github.io/reason-react-playground/")
           rightIcon=githubIcon
           onRightIconClick=(
             fun _event => Utils.openWindow "https://github.com/astrada/reason-react-playground/"
