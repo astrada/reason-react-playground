@@ -7,9 +7,9 @@ var $$Array     = require("bs-platform/lib/js/array.js");
 var $$String    = require("bs-platform/lib/js/string.js");
 var Caml_string = require("bs-platform/lib/js/caml_string.js");
 
-function convertCmi(cmiFileName, jsFileName) {
-  var cmiContent = Fs.readFileSync(cmiFileName, "binary");
-  var cmiLength = cmiContent.length;
+function serializeBinary(binFileName, jsFileName) {
+  var binContent = Fs.readFileSync(binFileName, "binary");
+  var binLength = binContent.length;
   var arrayStr1 = $$Array.init(256, (function (i) {
           return $$String.make(1, Char.chr(i));
         }));
@@ -18,8 +18,8 @@ function convertCmi(cmiFileName, jsFileName) {
         }));
   var fd = Fs.openSync(jsFileName, "a");
   Fs.writeSync(fd, $$String.make(1, /* "\"" */34));
-  for(var i = 0 ,i_finish = cmiLength - 1 | 0; i <= i_finish; ++i){
-    var c = Caml_string.get(cmiContent, i);
+  for(var i = 0 ,i_finish = binLength - 1 | 0; i <= i_finish; ++i){
+    var c = Caml_string.get(binContent, i);
     var exit = 0;
     if (c >= 32) {
       if (c >= 127) {
@@ -45,7 +45,7 @@ function convertCmi(cmiFileName, jsFileName) {
     } else {
       switch (c) {
         case 0 : 
-            if (i === (cmiLength - 1 | 0) || Caml_string.get(cmiContent, i + 1 | 0) < /* "0" */48 || Caml_string.get(cmiContent, i + 1 | 0) > /* "9" */57) {
+            if (i === (binLength - 1 | 0) || Caml_string.get(binContent, i + 1 | 0) < /* "0" */48 || Caml_string.get(binContent, i + 1 | 0) > /* "9" */57) {
               Fs.writeSync(fd, "\\0");
             } else {
               exit = 1;
@@ -91,5 +91,5 @@ function convertCmi(cmiFileName, jsFileName) {
   return /* () */0;
 }
 
-exports.convertCmi = convertCmi;
+exports.serializeBinary = serializeBinary;
 /* fs Not a pure module */
