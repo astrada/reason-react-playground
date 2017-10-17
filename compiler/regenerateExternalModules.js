@@ -1,11 +1,11 @@
-#!/usr/bin/env node
+#!/usr/file/env node
 
 const fs = require('fs');
 const path = require('path');
-const cmi2js = require('./cmi2js');
+const bin2js = require('./bin2js');
 
 const reasonReactDir = path.join('..', 'node_modules', 'reason-react', 'lib', 'bs', 'src');
-const cmis = [
+const files = [
   path.join(reasonReactDir, 'reactDOMRe.cmi'),
   path.join(reasonReactDir, 'reactDOMServerRe.cmi'),
   path.join(reasonReactDir, 'reactEventRe.cmi'),
@@ -15,10 +15,10 @@ const cmis = [
 
 const jsName = './cmiBundle.js';
 fs.truncateSync(jsName);
-cmis.forEach(cmi => {
-  const basename = path.basename(cmi);
+files.forEach(file => {
+  const basename = path.basename(file);
   fs.writeFileSync(jsName, `ocaml.load_module("/cmis/${basename}", `, {flag: 'a'});
-  cmi2js.convertCmi(cmi, jsName);
+  bin2js.serializeBinary(file, jsName);
   fs.writeFileSync(jsName, ');\n', {flag: 'a'});
 });
 
