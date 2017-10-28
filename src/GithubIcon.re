@@ -1,8 +1,8 @@
-let component = ReasonReact.statelessComponent "GithubIcon";
+let component = ReasonReact.statelessComponent("GithubIcon");
 
-let make _children => {
+let make = (_children) => {
   ...component,
-  render: fun _self =>
+  render: (_self) =>
     <svg viewBox="0 0 284 277">
       <g>
         <path

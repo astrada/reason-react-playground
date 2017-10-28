@@ -1,7 +1,7 @@
 type refmtResult = {
-  ocamlCode: option string,
-  reasonCode: option string,
-  errorMessage: option string
+  ocamlCode: option(string),
+  reasonCode: option(string),
+  errorMessage: option(string)
 };
 
 let refmtRE2ML: string => refmtResult;

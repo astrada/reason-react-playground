@@ -1,11 +1,11 @@
-type evalResult = Js.t {. errorMessage : Js.Nullable.t string};
+type evalResult = {. "errorMessage": Js.Nullable.t(string)};
 
-external eval : string => unit = "" [@@bs.val];
+[@bs.val] external eval : string => unit = "";
 
-let evalJs code =>
+let evalJs = (code) =>
   try {
-    eval code;
+    eval(code);
     {"errorMessage": Js.Nullable.null}
   } {
-  | Js.Exn.Error e => {"errorMessage": Js.Nullable.from_opt (Js.Exn.message e)}
+  | Js.Exn.Error(e) => {"errorMessage": Js.Nullable.from_opt(Js.Exn.message(e))}
   };

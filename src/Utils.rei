@@ -1,10 +1,10 @@
-let optionMap: ('a => 'b) => option 'a => option 'b;
+let optionMap: ('a => 'b, option('a)) => option('b);
 
-let debounce: 'a => wait::float? => 'a;
+let debounce: ('a, ~wait: float=?) => 'a;
 
 type compilerResult =
-  | OutputCode string
-  | ErrorMessage string;
+  | OutputCode(string)
+  | ErrorMessage(string);
 
 let refmtRE2ML: string => compilerResult;
 
@@ -16,10 +16,10 @@ let compileOCaml: string => compilerResult;
 
 type evalResult =
   | Success
-  | ErrorMessage string;
+  | ErrorMessage(string);
 
 let evalJs: string => evalResult;
 
 let redirect: string => unit;
 
-let openWindow: target::string? => string => unit;
+let openWindow: (~target: string=?, string) => unit;

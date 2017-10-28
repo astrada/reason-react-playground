@@ -30,7 +30,7 @@
     "deamdify": "^0.3.0",
     "react-toolbox-themr": "^1.0.2",
     "reason-react": "^0.2.4",
-    "reason-react-toolbox": "^0.2.1",
+    "reason-react-toolbox": "^0.3.0",
     "uglifyify": "^4.0.4"
   }
 }
