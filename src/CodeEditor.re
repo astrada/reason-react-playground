@@ -28,11 +28,28 @@ let labelStyle =
     borderRadius::"0 0 0 5px"
     ();
 
+let loadingMaskStyle =
+  ReactDOMRe.Style.make
+    position::"absolute"
+    top::"0"
+    left::"0"
+    backgroundColor::"rgba(200, 200, 200, 0.6)"
+    padding::"5px 10px"
+    fontWeight::"bold"
+    fontFamily::"monospace"
+    color::"black"
+    fontSize::"14pt"
+    lineHeight::"14px"
+    flexDirection::"row"
+    alignItems::"center"
+    zIndex::"20"
+    ();
+
 let errorBodyStyle = ReactDOMRe.Style.make fontFamily::"monospace" fontSize::"12pt" ();
 
 let errorStyle = ReactDOMRe.Style.make backgroundColor::"#faa" padding::"10px 20px" ();
 
-let make ::label ::mode ::code=? ::error=? ::onChange=? ::readOnly=? _children => {
+let make ::label ::mode ::loading=false ::code=? ::error=? ::onChange=? ::readOnly=? _children => {
   ...component,
   render: fun _self => {
     let options = {"lineNumbers": Js.Boolean.to_js_boolean true};
@@ -42,7 +59,14 @@ let make ::label ::mode ::code=? ::error=? ::onChange=? ::readOnly=? _children =
       | Some ro => Js.Obj.assign options {"readOnly": Js.Boolean.to_js_boolean ro}
       | None => options
       };
+    let loadingMask =
+      if loading {
+        <div style=loadingMaskStyle> (ReasonReact.stringToElement "Loading...") </div>
+      } else {
+        ReasonReact.nullElement
+      };
     <div style=rowStyle>
+      loadingMask
       <div style=labelStyle> (ReasonReact.stringToElement label) </div>
       <CodeMirror value=?code onChange=?onChange options preservePositionScroll=true />
       <Error errorMessage=?error />

@@ -5,6 +5,7 @@ let labelStyle: ReactDOMRe.style;
 let make:
   label::string =>
   mode::'a =>
+  loading::bool? =>
   code::string? =>
   error::string? =>
   onChange::(string => CodeMirror.change => unit)? =>
