@@ -1,5 +1,4 @@
-[@bs.module "localforage"] external getItem_ : string => Js.Promise.t(Js.Nullable.t('a)) =
-  "getItem";
+[@bs.module "localforage"] external getItem_ : string => Js.Promise.t(Js.nullable('a)) = "getItem";
 
 [@bs.module "localforage"] external setItem_ : (string, 'a) => Js.Promise.t('a) = "setItem";
 

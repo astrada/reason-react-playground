@@ -1,3 +1,3 @@
-type evalResult = {. "errorMessage": Js.Nullable.t(string)};
+type evalResult = {. "errorMessage": Js.nullable(string)};
 
 let evalJs: string => evalResult;

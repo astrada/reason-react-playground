@@ -2,8 +2,6 @@
 
 [@bs.module] external theme : ReactToolbox.ThemeProvider.theme = "./toolbox/theme";
 
-let defaultStorageKey = "default-reason-code";
-
 let defaultResult = Utils.OutputCode("");
 
 type compilerState = {
@@ -58,23 +56,32 @@ let hasError = (compilerResult) =>
   | Utils.ErrorMessage(_) => true
   };
 
+let refmtRE2ML = (reasonCode) => {
+  let refmtResult = Utils.refmtRE2ML(reasonCode);
+  let jsxCode = getCode(refmtResult);
+  let jsxv2Result = Utils.jsxv2Rewrite(jsxCode);
+  let ocamlCode = getCode(jsxv2Result);
+  let ocamlResult = Utils.compileOCaml(ocamlCode);
+  Vow.Result.return((reasonCode, refmtResult, jsxv2Result, ocamlResult))
+};
+
+let refmtML2RE = (ocamlJsxCode) => {
+  let refmtResult = Utils.refmtML2RE(ocamlJsxCode);
+  let reasonCode = getCode(refmtResult);
+  let jsxv2Result = Utils.jsxv2Rewrite(ocamlJsxCode);
+  let ocamlCode = getCode(jsxv2Result);
+  let ocamlResult = Utils.compileOCaml(ocamlCode);
+  Vow.Result.return((reasonCode, refmtResult, jsxv2Result, ocamlResult))
+};
+
 let initialVow = {
-  let reasonCodeVow = LocalForage.getItem(defaultStorageKey);
+  let initialCodeVow = Persister.loadPersistedState();
   Vow.Result.map(
-    (o) => {
-      let reasonCode =
-        switch o {
-        | None => defaultReasonCode
-        | Some(code) => code
-        };
-      let refmtResult = Utils.refmtRE2ML(reasonCode);
-      let jsxCode = getCode(refmtResult);
-      let jsxv2Result = Utils.jsxv2Rewrite(jsxCode);
-      let ocamlCode = getCode(jsxv2Result);
-      let ocamlResult = Utils.compileOCaml(ocamlCode);
-      Vow.Result.return((reasonCode, refmtResult, jsxv2Result, ocamlResult))
-    },
-    reasonCodeVow
+    fun
+    | Persister.Null => refmtRE2ML(defaultReasonCode)
+    | Persister.Reason(reasonCode) => refmtRE2ML(reasonCode)
+    | Persister.OCaml(ocamlCode) => refmtML2RE(ocamlCode),
+    initialCodeVow
   )
 };
 
@@ -137,12 +144,7 @@ let make = (_children) => {
             show: state.ocaml.show || hasError(ocamlResult)
           }
         },
-        (
-          (_self) => {
-            let vow = LocalForage.setItem(defaultStorageKey, reasonCode);
-            Vow.Result.sideEffect((_) => (), vow)
-          }
-        )
+        ((_self) => Persister.saveState(Persister.Reason(reasonCode)))
       )
     | ToggleJsxV2 =>
       ReasonReact.Update({...state, jsxv2: {...state.jsxv2, show: ! state.jsxv2.show}})
