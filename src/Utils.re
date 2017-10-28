@@ -13,7 +13,7 @@ type compilerResult =
   | ErrorMessage(string);
 
 let refmtRE2ML = (code) => {
-  let result = Refmt.refmtRE2ML(code);
+  let result = RefmtJs.refmtRE2ML(code);
   switch result.errorMessage {
   | Some(errorMessage) => ErrorMessage(errorMessage)
   | None => OutputCode(Js.Option.getWithDefault("", result.ocamlCode))
@@ -21,7 +21,7 @@ let refmtRE2ML = (code) => {
 };
 
 let refmtML2RE = (code) => {
-  let result = Refmt.refmtML2RE(code);
+  let result = RefmtJs.refmtML2RE(code);
   switch result.errorMessage {
   | Some(errorMessage) => ErrorMessage(errorMessage)
   | None => OutputCode(Js.Option.getWithDefault("", result.reasonCode))
