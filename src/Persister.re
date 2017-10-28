@@ -3,32 +3,34 @@ let defaultStorageKey = "reason-react-playground";
 type code =
   | Null
   | Reason(string)
-  | OCaml(string);
+  | OCamlJsx(string);
 
 type jsData = {. language: string, code: string};
 
 let reasonLabel = "reason";
 
-let ocamlLabel = "ocaml";
+let ocamlJsxLabel = "ocaml-jsx";
 
 let reasonQueryPrefix = "?" ++ reasonLabel ++ "=";
 
-let ocamlQueryPrefix = "?" ++ ocamlLabel ++ "=";
+let ocamlJsxQueryPrefix = "?" ++ ocamlJsxLabel ++ "=";
 
 let code2jsData =
   fun
   | Null => Js.Nullable.null
   | Reason(code) => Js.Nullable.return({"language": reasonLabel, "code": code})
-  | OCaml(code) => Js.Nullable.return({"language": ocamlLabel, "code": code});
+  | OCamlJsx(code) => Js.Nullable.return({"language": ocamlJsxLabel, "code": code});
 
 let jsData2code = (data) =>
   switch data {
   | None => Null
   | Some(data) =>
-    if (data##language == ocamlLabel) {
-      OCaml(data##code)
-    } else {
+    if (data##language == reasonLabel) {
       Reason(data##code)
+    } else if (data##language == ocamlJsxLabel) {
+      OCamlJsx(data##code)
+    } else {
+      Null
     }
   };
 
@@ -47,17 +49,17 @@ let getCodeFromQueryString = () => {
   | None => Null
   | Some(s) =>
     let reasonPrefixLen = String.length(reasonQueryPrefix);
-    let ocamlPrefixLen = String.length(ocamlQueryPrefix);
+    let ocamlJsxPrefixLen = String.length(ocamlJsxQueryPrefix);
     let len = String.length(s);
     if (len > reasonPrefixLen && String.sub(s, 0, reasonPrefixLen) == reasonQueryPrefix) {
       let compressedCode = String.sub(s, reasonPrefixLen, len - reasonPrefixLen);
       let code = LzString.decompressFromEncodedURIComponent(compressedCode);
       Reason(code)
-    } else if (len > String.length(ocamlQueryPrefix)
-               && String.sub(s, 0, ocamlPrefixLen) == ocamlQueryPrefix) {
-      let compressedCode = String.sub(s, ocamlPrefixLen, len - ocamlPrefixLen);
+    } else if (len > String.length(ocamlJsxQueryPrefix)
+               && String.sub(s, 0, ocamlJsxPrefixLen) == ocamlJsxQueryPrefix) {
+      let compressedCode = String.sub(s, ocamlJsxPrefixLen, len - ocamlJsxPrefixLen);
       let code = LzString.decompressFromEncodedURIComponent(compressedCode);
-      OCaml(code)
+      OCamlJsx(code)
     } else {
       Null
     }
@@ -73,7 +75,7 @@ let setQueryStringFromCode = (code) => {
   switch code {
   | Null => ()
   | Reason(code) => replaceUrl(code, reasonQueryPrefix)
-  | OCaml(code) => replaceUrl(code, ocamlQueryPrefix)
+  | OCamlJsx(code) => replaceUrl(code, ocamlJsxQueryPrefix)
   }
 };
 
@@ -93,7 +95,7 @@ let loadPersistedState = () => {
   switch codeFromQueryString {
   | Null => getCodeFromStorage()
   | Reason(_)
-  | OCaml(_) => Vow.Result.return(codeFromQueryString)
+  | OCamlJsx(_) => Vow.Result.return(codeFromQueryString)
   }
 };
 
@@ -101,7 +103,7 @@ let saveState = (code) =>
   switch code {
   | Null => ()
   | Reason(_)
-  | OCaml(_) =>
+  | OCamlJsx(_) =>
     setQueryStringFromCode(code);
     saveCodeToStorage(code)
   };

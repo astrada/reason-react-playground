@@ -20,11 +20,13 @@ type state = {
 };
 
 type action =
-  | UpdateAll((string, Utils.compilerResult, Utils.compilerResult, Utils.compilerResult))
+  | UpdateReason((string, Utils.compilerResult, Utils.compilerResult, Utils.compilerResult))
+  | UpdateOCamlJsx((string, Utils.compilerResult, Utils.compilerResult, Utils.compilerResult))
   | ToggleJsxV2
   | ToggleOCaml
   | ToggleJs
-  | ShowJs;
+  | ShowJs
+  | Reset;
 
 let component = ReasonReact.reducerComponent("App");
 
@@ -58,11 +60,19 @@ let hasError = (compilerResult) =>
 
 let refmtRE2ML = (reasonCode) => {
   let refmtResult = Utils.refmtRE2ML(reasonCode);
-  let jsxCode = getCode(refmtResult);
-  let jsxv2Result = Utils.jsxv2Rewrite(jsxCode);
+  let ocamlJsxCode = getCode(refmtResult);
+  let jsxv2Result =
+    switch refmtResult {
+    | Utils.OutputCode(_) => Utils.jsxv2Rewrite(ocamlJsxCode)
+    | Utils.ErrorMessage(_) => defaultResult
+    };
   let ocamlCode = getCode(jsxv2Result);
-  let ocamlResult = Utils.compileOCaml(ocamlCode);
-  Vow.Result.return((reasonCode, refmtResult, jsxv2Result, ocamlResult))
+  let ocamlResult =
+    switch jsxv2Result {
+    | Utils.OutputCode(_) => Utils.compileOCaml(ocamlCode)
+    | Utils.ErrorMessage(_) => defaultResult
+    };
+  (reasonCode, refmtResult, jsxv2Result, ocamlResult, Persister.Reason(reasonCode))
 };
 
 let refmtML2RE = (ocamlJsxCode) => {
@@ -70,17 +80,27 @@ let refmtML2RE = (ocamlJsxCode) => {
   let reasonCode = getCode(refmtResult);
   let jsxv2Result = Utils.jsxv2Rewrite(ocamlJsxCode);
   let ocamlCode = getCode(jsxv2Result);
-  let ocamlResult = Utils.compileOCaml(ocamlCode);
-  Vow.Result.return((reasonCode, refmtResult, jsxv2Result, ocamlResult))
+  let ocamlResult =
+    switch jsxv2Result {
+    | Utils.OutputCode(_) => Utils.compileOCaml(ocamlCode)
+    | Utils.ErrorMessage(_) => defaultResult
+    };
+  (
+    reasonCode,
+    Utils.OutputCode(ocamlJsxCode),
+    jsxv2Result,
+    ocamlResult,
+    Persister.OCamlJsx(ocamlJsxCode)
+  )
 };
 
 let initialVow = {
   let initialCodeVow = Persister.loadPersistedState();
   Vow.Result.map(
     fun
-    | Persister.Null => refmtRE2ML(defaultReasonCode)
-    | Persister.Reason(reasonCode) => refmtRE2ML(reasonCode)
-    | Persister.OCaml(ocamlCode) => refmtML2RE(ocamlCode),
+    | Persister.Null => Vow.Result.return(refmtRE2ML(defaultReasonCode))
+    | Persister.Reason(reasonCode) => Vow.Result.return(refmtRE2ML(reasonCode))
+    | Persister.OCamlJsx(ocamlJsxCode) => Vow.Result.return(refmtML2RE(ocamlJsxCode)),
     initialCodeVow
   )
 };
@@ -102,16 +122,27 @@ let make = (_children) => {
       Vow.Result.sideEffect(
         fun
         | `Fail () => ()
-        | `Success(reasonCode, refmtResult, jsxv2Result, ocamlResult) =>
-          self.reduce(() => UpdateAll((reasonCode, refmtResult, jsxv2Result, ocamlResult)), ()),
+        | `Success(reasonCode, refmtResult, jsxv2Result, ocamlResult, persisterCode) =>
+          switch persisterCode {
+          | Persister.Null => ()
+          | Persister.Reason(_) =>
+            self.reduce(
+              () => UpdateReason((reasonCode, refmtResult, jsxv2Result, ocamlResult)),
+              ()
+            )
+          | Persister.OCamlJsx(_) =>
+            self.reduce(
+              () => UpdateOCamlJsx((reasonCode, refmtResult, jsxv2Result, ocamlResult)),
+              ()
+            )
+          },
         initialVow
       )
     };
     ReasonReact.NoUpdate
   },
-  reducer: (action, state) =>
-    switch action {
-    | UpdateAll((reasonCode, reasonResult, jsxv2Result, ocamlResult)) =>
+  reducer: (action, state) => {
+    let updateAll = (reasonCode, reasonResult, jsxv2Result, ocamlResult, codeToSave) => {
       let jsxv2Code = getCode(reasonResult);
       let jsxv2Code =
         if (jsxv2Code == "") {
@@ -126,6 +157,11 @@ let make = (_children) => {
         } else {
           ocamlCode
         };
+      let editingOCamlJsx =
+        switch codeToSave {
+        | Persister.OCamlJsx(_) => true
+        | _ => false
+        };
       ReasonReact.UpdateWithSideEffects(
         {
           ...state,
@@ -135,7 +171,7 @@ let make = (_children) => {
             code: jsxv2Code,
             result: jsxv2Result,
             compiling: false,
-            show: state.jsxv2.show || hasError(jsxv2Result)
+            show: state.jsxv2.show || editingOCamlJsx || hasError(jsxv2Result)
           },
           ocaml: {
             code: ocamlCode,
@@ -144,7 +180,19 @@ let make = (_children) => {
             show: state.ocaml.show || hasError(ocamlResult)
           }
         },
-        ((_self) => Persister.saveState(Persister.Reason(reasonCode)))
+        (_self) => Persister.saveState(codeToSave)
+      )
+    };
+    switch action {
+    | UpdateReason((reasonCode, reasonResult, jsxv2Result, ocamlResult)) =>
+      updateAll(reasonCode, reasonResult, jsxv2Result, ocamlResult, Persister.Reason(reasonCode))
+    | UpdateOCamlJsx((reasonCode, reasonResult, jsxv2Result, ocamlResult)) =>
+      updateAll(
+        reasonCode,
+        reasonResult,
+        jsxv2Result,
+        ocamlResult,
+        Persister.OCamlJsx(getCode(reasonResult))
       )
     | ToggleJsxV2 =>
       ReasonReact.Update({...state, jsxv2: {...state.jsxv2, show: ! state.jsxv2.show}})
@@ -152,7 +200,12 @@ let make = (_children) => {
       ReasonReact.Update({...state, ocaml: {...state.ocaml, show: ! state.ocaml.show}})
     | ToggleJs => ReasonReact.Update({...state, showJs: ! state.showJs})
     | ShowJs => ReasonReact.Update({...state, showJs: true})
-    },
+    | Reset =>
+      let (reasonCode, reasonResult, jsxv2Result, ocamlResult, codeToSave) =
+        refmtRE2ML(defaultReasonCode);
+      updateAll(reasonCode, reasonResult, jsxv2Result, ocamlResult, codeToSave)
+    }
+  },
   render: (self) => {
     let logo = <Logo />;
     let githubIcon = <GithubIcon />;
@@ -184,13 +237,13 @@ let make = (_children) => {
         | Utils.OutputCode(code) => code
         | Utils.ErrorMessage(_) => self.state.reason.code
         };
-      (reasonCode, self.state.reason.result, rewriteResult, ocamlResult)
+      (reasonCode, Utils.OutputCode(code), rewriteResult, ocamlResult)
     };
     let onReasonChange = (code, _change) =>
-      self.reduce((_event) => UpdateAll(refmtRE2ML(code)), ());
+      self.reduce((_event) => UpdateReason(refmtRE2ML(code)), ());
     let debouncedOnReasonChange = Utils.debounce(onReasonChange, ~wait=250.0);
     let onOCamlJsxChange = (code, _change) =>
-      self.reduce((_event) => UpdateAll(refmtML2RE(code)), ());
+      self.reduce((_event) => UpdateOCamlJsx(refmtML2RE(code)), ());
     let debouncedOnOCamlJsxChange = Utils.debounce(onOCamlJsxChange, ~wait=250.0);
     let (jsCode, jsErrorMessage) =
       switch self.state.ocaml.result {
@@ -236,8 +289,18 @@ let make = (_children) => {
           rightIcon=githubIcon
           onRightIconClick=(
             (_event) => Utils.openWindow("https://github.com/astrada/reason-react-playground/")
-          )
-        />
+          )>
+          <ReactToolbox.IconMenu
+            icon=(ReasonReact.stringToElement("more_vert"))
+            position=ReactToolbox.IconMenu.Position.TopRight
+            menuRipple=true>
+            <ReactToolbox.MenuItem
+              icon=(ReasonReact.stringToElement("delete"))
+              caption="Reset"
+              onClick=(self.reduce((_event) => Reset))
+            />
+          </ReactToolbox.IconMenu>
+        </ReactToolbox.AppBar>
         <section>
           <CodeEditor
             label="Reason"
