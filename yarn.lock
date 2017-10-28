@@ -6235,6 +6235,10 @@ reason-scripts@^0.6.9:
   optionalDependencies:
     fsevents "1.1.2"
 
+reason@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/reason/-/reason-3.0.0.tgz#e44c581f50102fe07e4d0462e610537e1d17aa2e"
+
 recast@^0.10.1:
   version "0.10.43"
   resolved "https://registry.yarnpkg.com/recast/-/recast-0.10.43.tgz#b95d50f6d60761a5f6252e15d80678168491ce7f"
