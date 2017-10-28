@@ -4,26 +4,20 @@ type refmtResult = {
   errorMessage: option(string)
 };
 
-type jsModule;
-
-[@bs.val] [@bs.scope "window"] external requireBrowser : string => jsModule = "require";
-
 type astAndComments;
 
-[@bs.send] external parseRE : (jsModule, string) => astAndComments = "";
+[@bs.module "reason/refmt"] external parseRE : string => astAndComments = "";
 
-[@bs.send] external parseML : (jsModule, string) => astAndComments = "";
+[@bs.module "reason/refmt"] external parseML : string => astAndComments = "";
 
-[@bs.send] external printRE : (jsModule, astAndComments) => string = "";
+[@bs.module "reason/refmt"] external printRE : astAndComments => string = "";
 
-[@bs.send] external printML : (jsModule, astAndComments) => string = "";
-
-let refmt = requireBrowser("refmt");
+[@bs.module "reason/refmt"] external printML : astAndComments => string = "";
 
 let refmtRE2ML = (code) =>
   try {
-    let astAndComments = parseRE(refmt, code);
-    let ocamlCode = printML(refmt, astAndComments);
+    let astAndComments = parseRE(code);
+    let ocamlCode = printML(astAndComments);
     {ocamlCode: Some(ocamlCode), reasonCode: None, errorMessage: None}
   } {
   | Js.Exn.Error(e) => {ocamlCode: None, reasonCode: None, errorMessage: Js.Exn.message(e)}
@@ -31,8 +25,8 @@ let refmtRE2ML = (code) =>
 
 let refmtML2RE = (code) =>
   try {
-    let astAndComments = parseML(refmt, code);
-    let reasonCode = printRE(refmt, astAndComments);
+    let astAndComments = parseML(code);
+    let reasonCode = printRE(astAndComments);
     {ocamlCode: None, reasonCode: Some(reasonCode), errorMessage: None}
   } {
   | Js.Exn.Error(e) => {ocamlCode: None, reasonCode: None, errorMessage: Js.Exn.message(e)}
