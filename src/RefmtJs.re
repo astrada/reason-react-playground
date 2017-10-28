@@ -4,28 +4,36 @@ type refmtResult = {
   errorMessage: option(string)
 };
 
-[@bs.val] external refmt : (string, string, string, string) => array(string) = "";
+type jsModule;
 
-[@bs.get_index] external get : (array(string), int) => string = "";
+[@bs.val] [@bs.scope "window"] external requireBrowser : string => jsModule = "require";
 
-let refmtRE2ML = (code) => {
-  let converted = refmt(code, "RE", "implementation", "ML");
-  if (get(converted, 0) == "REtoML") {
-    {ocamlCode: Some(get(converted, 1)), reasonCode: None, errorMessage: None}
-  } else if (get(converted, 1) == "") {
-    {ocamlCode: None, reasonCode: None, errorMessage: Some("Syntax error")}
-  } else {
-    {ocamlCode: None, reasonCode: None, errorMessage: Some(get(converted, 1))}
-  }
-};
+type astAndComments;
 
-let refmtML2RE = (code) => {
-  let converted = refmt(code, "ML", "implementation", "RE");
-  if (get(converted, 0) == "MLtoRE") {
-    {ocamlCode: None, reasonCode: Some(get(converted, 1)), errorMessage: None}
-  } else if (get(converted, 1) == "") {
-    {ocamlCode: None, reasonCode: None, errorMessage: Some("Syntax error")}
-  } else {
-    {ocamlCode: None, reasonCode: None, errorMessage: Some(get(converted, 1))}
-  }
-};
+[@bs.send] external parseRE : (jsModule, string) => astAndComments = "";
+
+[@bs.send] external parseML : (jsModule, string) => astAndComments = "";
+
+[@bs.send] external printRE : (jsModule, astAndComments) => string = "";
+
+[@bs.send] external printML : (jsModule, astAndComments) => string = "";
+
+let refmt = requireBrowser("refmt");
+
+let refmtRE2ML = (code) =>
+  try {
+    let astAndComments = parseRE(refmt, code);
+    let ocamlCode = printML(refmt, astAndComments);
+    {ocamlCode: Some(ocamlCode), reasonCode: None, errorMessage: None}
+  } {
+  | Js.Exn.Error(e) => {ocamlCode: None, reasonCode: None, errorMessage: Js.Exn.message(e)}
+  };
+
+let refmtML2RE = (code) =>
+  try {
+    let astAndComments = parseML(refmt, code);
+    let reasonCode = printRE(refmt, astAndComments);
+    {ocamlCode: None, reasonCode: Some(reasonCode), errorMessage: None}
+  } {
+  | Js.Exn.Error(e) => {ocamlCode: None, reasonCode: None, errorMessage: Js.Exn.message(e)}
+  };

@@ -31,15 +31,14 @@ type action =
 let component = ReasonReact.reducerComponent("App");
 
 let defaultReasonCode = {j|module Greeting = {
-  let component = ReasonReact.statelessComponent "Greeting";
-
-  let make _children => {
+  let component = ReasonReact.statelessComponent("Greeting");
+  let make = (_children) => {
     ...component,
-    render: fun self => <button> (ReasonReact.stringToElement "Hello!") </button>
+    render: (self) => <button> (ReasonReact.stringToElement("Hello!")) </button>
   };
 };
 
-ReactDOMRe.renderToElementWithId <Greeting /> "preview";|j};
+ReactDOMRe.renderToElementWithId(<Greeting />, "preview");|j};
 
 let getCode = (result) =>
   switch result {
