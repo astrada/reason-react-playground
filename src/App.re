@@ -2,6 +2,8 @@
 
 external theme : ReactToolbox.ThemeProvider.theme = "./toolbox/theme" [@@bs.module];
 
+let defaultStorageKey = "default-reason-code";
+
 let defaultResult = Utils.OutputCode "";
 
 type compilerState = {
@@ -12,6 +14,7 @@ type compilerState = {
 };
 
 type state = {
+  loading: bool,
   reason: compilerState,
   jsxv2: compilerState,
   ocaml: compilerState,
@@ -19,12 +22,6 @@ type state = {
 };
 
 type action =
-  | CompileReason string
-  | UpdateRefmtResult Utils.compilerResult
-  | RewriteJsxV2 string
-  | UpdateJsxV2Result Utils.compilerResult
-  | CompileOCaml string
-  | UpdateBucklescriptResult Utils.compilerResult
   | UpdateAll (string, Utils.compilerResult, Utils.compilerResult, Utils.compilerResult)
   | ToggleJsxV2
   | ToggleOCaml
@@ -33,7 +30,7 @@ type action =
 
 let component = ReasonReact.reducerComponent "App";
 
-let initialReasonCode = {j|module Greeting = {
+let defaultReasonCode = {j|module Greeting = {
   let component = ReasonReact.statelessComponent "Greeting";
 
   let make _children => {
@@ -62,49 +59,55 @@ let hasError compilerResult =>
   | Utils.ErrorMessage _ => true
   };
 
-let initialReasonResult = Utils.refmtRE2ML initialReasonCode;
-
-let initialJsxV2Code = getCode initialReasonResult;
-
-let initialJsxV2Result = Utils.jsxv2Rewrite initialJsxV2Code;
-
-let initialOCamlCode = getCode initialJsxV2Result;
-
-let initialOCamlResult = Utils.compileOCaml initialOCamlCode;
+let initialVow = {
+  let reasonCodeVow = LocalForage.getItem defaultStorageKey;
+  Vow.Result.map
+    (
+      fun o => {
+        let reasonCode =
+          switch o {
+          | None => defaultReasonCode
+          | Some code => code
+          };
+        let refmtResult = Utils.refmtRE2ML reasonCode;
+        let jsxCode = getCode refmtResult;
+        let jsxv2Result = Utils.jsxv2Rewrite jsxCode;
+        let ocamlCode = getCode jsxv2Result;
+        let ocamlResult = Utils.compileOCaml ocamlCode;
+        Vow.Result.return (reasonCode, refmtResult, jsxv2Result, ocamlResult)
+      }
+    )
+    reasonCodeVow
+};
 
 let make _children => {
   ...component,
   initialState: fun () => {
     let defaultCompilerState = {code: "", result: defaultResult, compiling: false, show: false};
     {
-      reason: {...defaultCompilerState, code: initialReasonCode, show: true},
-      jsxv2: {...defaultCompilerState, code: initialJsxV2Code, result: initialJsxV2Result},
-      ocaml: {...defaultCompilerState, code: initialOCamlCode, result: initialOCamlResult},
+      loading: true,
+      reason: defaultCompilerState,
+      jsxv2: defaultCompilerState,
+      ocaml: defaultCompilerState,
       showJs: false
     }
   },
+  didMount: fun self => {
+    if self.state.loading {
+      Vow.Result.sideEffect
+        (
+          fun
+          | `Fail () => ()
+          | `Success (reasonCode, refmtResult, jsxv2Result, ocamlResult) =>
+            self.reduce
+              (fun () => UpdateAll (reasonCode, refmtResult, jsxv2Result, ocamlResult)) ()
+        )
+        initialVow
+    };
+    ReasonReact.NoUpdate
+  },
   reducer: fun action state =>
     switch action {
-    | CompileReason code =>
-      ReasonReact.Update {...state, reason: {...state.reason, code, compiling: true}}
-    | UpdateRefmtResult result =>
-      ReasonReact.Update {
-        ...state,
-        reason: {...state.reason, result, compiling: false},
-        jsxv2: {...state.jsxv2, code: getCode result}
-      }
-    | RewriteJsxV2 code =>
-      ReasonReact.Update {...state, jsxv2: {...state.jsxv2, code, compiling: true}}
-    | UpdateJsxV2Result result =>
-      ReasonReact.Update {
-        ...state,
-        jsxv2: {...state.jsxv2, result, compiling: false},
-        ocaml: {...state.ocaml, code: getCode result}
-      }
-    | CompileOCaml code =>
-      ReasonReact.Update {...state, ocaml: {...state.ocaml, code, compiling: true}}
-    | UpdateBucklescriptResult result =>
-      ReasonReact.Update {...state, ocaml: {...state.ocaml, result, compiling: false}}
     | UpdateAll (reasonCode, reasonResult, jsxv2Result, ocamlResult) =>
       let jsxv2Code = getCode reasonResult;
       let jsxv2Code =
@@ -120,22 +123,30 @@ let make _children => {
         } else {
           ocamlCode
         };
-      ReasonReact.Update {
-        ...state,
-        reason: {...state.reason, code: reasonCode, result: reasonResult, compiling: false},
-        jsxv2: {
-          code: jsxv2Code,
-          result: jsxv2Result,
-          compiling: false,
-          show: state.jsxv2.show || hasError jsxv2Result
-        },
-        ocaml: {
-          code: ocamlCode,
-          result: ocamlResult,
-          compiling: false,
-          show: state.ocaml.show || hasError ocamlResult
+      ReasonReact.UpdateWithSideEffects
+        {
+          ...state,
+          loading: false,
+          reason: {...state.reason, code: reasonCode, result: reasonResult, compiling: false},
+          jsxv2: {
+            code: jsxv2Code,
+            result: jsxv2Result,
+            compiling: false,
+            show: state.jsxv2.show || hasError jsxv2Result
+          },
+          ocaml: {
+            code: ocamlCode,
+            result: ocamlResult,
+            compiling: false,
+            show: state.ocaml.show || hasError ocamlResult
+          }
         }
-      }
+        (
+          fun _self => {
+            let vow = LocalForage.setItem defaultStorageKey reasonCode;
+            Vow.Result.sideEffect (fun _ => ()) vow
+          }
+        )
     | ToggleJsxV2 =>
       ReasonReact.Update {...state, jsxv2: {...state.jsxv2, show: not state.jsxv2.show}}
     | ToggleOCaml =>
@@ -164,7 +175,7 @@ let make _children => {
           (rewriteResult, ocamlResult)
         | Utils.ErrorMessage _ => (defaultResult, defaultResult)
         };
-      (self.state.reason.code, reasonResult, rewriteResult, ocamlResult)
+      (code, reasonResult, rewriteResult, ocamlResult)
     };
     let refmtML2RE code => {
       let (_, rewriteResult, ocamlResult) = rewriteJsxV2 code;
@@ -214,7 +225,9 @@ let make _children => {
         <ReactToolbox.AppBar
           title="Reason React Playground"
           leftIcon=logo
-          onLeftIconClick=(fun _event => Utils.redirect "https://astrada.github.io/reason-react-playground/")
+          onLeftIconClick=(
+            fun _event => Utils.redirect "https://astrada.github.io/reason-react-playground/"
+          )
           rightIcon=githubIcon
           onRightIconClick=(
             fun _event => Utils.openWindow "https://github.com/astrada/reason-react-playground/"
@@ -224,6 +237,7 @@ let make _children => {
           <CodeEditor
             label="Reason"
             mode="rust"
+            loading=self.state.loading
             code=self.state.reason.code
             error=?(getError self.state.reason.result)
             onChange=debouncedOnReasonChange
