@@ -5,7 +5,8 @@
   ],
   "bs-dependencies": [
     "reason-react",
-    "reason-react-toolbox"
+    "reason-react-toolbox",
+    "vow"
   ],
   "bs-dev-dependencies": [
     "bs-jest"
