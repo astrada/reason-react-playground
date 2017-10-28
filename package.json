@@ -13,7 +13,8 @@
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "react-toolbox": "^2.0.0-beta.12",
-    "reason-scripts": "^0.6.9"
+    "reason-scripts": "^0.6.9",
+    "vow": "https://github.com/wokalski/vow.git"
   },
   "scripts": {
     "start": "react-scripts start",
