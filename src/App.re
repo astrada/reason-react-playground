@@ -291,6 +291,7 @@ let make = (_children) => {
             (_event) => Utils.openWindow("https://github.com/astrada/reason-react-playground/")
           )>
           <ReactToolbox.IconMenu
+            className="white-icon"
             icon=(ReasonReact.stringToElement("more_vert"))
             position=ReactToolbox.IconMenu.Position.TopRight
             menuRipple=true>
