@@ -9,7 +9,7 @@ const browserify = require('browserify');
 
 const b = browserify();
 
-const reactFile = path.join(__dirname, '..', 'node_modules', 'react', 'react.js');
+const reactFile = path.join(__dirname, '..', 'node_modules', 'reason-react', 'node_modules', 'react', 'index.js');
 b.require(reactFile, {expose: "react"});
 
 const reasonReactDir = path.join(__dirname, '..', 'node_modules', 'reason-react', 'lib', 'js', 'src');
