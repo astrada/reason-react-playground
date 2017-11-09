@@ -52,6 +52,13 @@ let getCode = (result) =>
   | Utils.ErrorMessage(_) => None
   };
 
+  let hasWarnings = (compilerResult) =>
+  switch compilerResult {
+  | Utils.OutputCode(_, Some(_)) => true
+  | Utils.OutputCode(_, None)
+  | Utils.ErrorMessage(_) => false
+  };
+
 let getError = (compilerResult) =>
   switch compilerResult {
   | Utils.OutputCode(_) => None
@@ -183,7 +190,7 @@ let make = (_children) => {
             code: ocamlCode,
             result: ocamlResult,
             compiling: false,
-            show: state.ocaml.show || hasError(ocamlResult)
+            show: state.ocaml.show || hasError(ocamlResult) || hasWarnings(ocamlResult)
           }
         },
         (_self) => Persister.saveState(codeToSave)
