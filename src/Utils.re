@@ -9,14 +9,14 @@ let optionMap = (fn, option) =>
 let debounce = (func, ~wait=0.0) => lodashDebounce(func, Js.Nullable.return(wait));
 
 type compilerResult =
-  | OutputCode(string)
+  | OutputCode(string, option(string))
   | ErrorMessage(string);
 
 let refmtRE2ML = (code) => {
   let result = RefmtJs.refmtRE2ML(code);
   switch result.errorMessage {
   | Some(errorMessage) => ErrorMessage(errorMessage)
-  | None => OutputCode(Js.Option.getWithDefault("", result.ocamlCode))
+  | None => OutputCode(Js.Option.getWithDefault("", result.ocamlCode), None)
   }
 };
 
@@ -24,7 +24,7 @@ let refmtML2RE = (code) => {
   let result = RefmtJs.refmtML2RE(code);
   switch result.errorMessage {
   | Some(errorMessage) => ErrorMessage(errorMessage)
-  | None => OutputCode(Js.Option.getWithDefault("", result.reasonCode))
+  | None => OutputCode(Js.Option.getWithDefault("", result.reasonCode), None)
   }
 };
 
@@ -35,18 +35,18 @@ let jsxv2Rewrite = (code) => {
   switch outputCode {
   | Some("")
   | None => ErrorMessage(Js.Option.getWithDefault("", errorMessage))
-  | Some(c) => OutputCode(c)
+  | Some(c) => OutputCode(c, None)
   }
 };
 
 let compileOCaml = (code) => {
-  let result = BucklescriptCompiler.compile(code);
+  let (result, warnings) = BucklescriptCompiler.compile(code);
   let outputCode = Js.Nullable.to_opt(result##js_code);
   let errorMessage = Js.Nullable.to_opt(result##js_error_msg);
   switch outputCode {
   | Some("")
   | None => ErrorMessage(Js.Option.getWithDefault("", errorMessage))
-  | Some(c) => OutputCode(c)
+  | Some(c) => OutputCode(c, if (warnings == "") None else Some(warnings))
   }
 };
 

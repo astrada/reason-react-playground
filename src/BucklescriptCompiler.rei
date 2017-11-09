@@ -10,4 +10,4 @@ type compilerResult = {
   "_type": Js.nullable(string)
 };
 
-let compile: string => compilerResult;
+let compile: string => (compilerResult, string);

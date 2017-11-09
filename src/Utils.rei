@@ -3,7 +3,7 @@ let optionMap: ('a => 'b, option('a)) => option('b);
 let debounce: ('a, ~wait: float=?) => 'a;
 
 type compilerResult =
-  | OutputCode(string)
+  | OutputCode(string, option(string))
   | ErrorMessage(string);
 
 let refmtRE2ML: string => compilerResult;

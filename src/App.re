@@ -2,7 +2,7 @@
 
 [@bs.module] external theme : ReactToolbox.ThemeProvider.theme = "./toolbox/theme";
 
-let defaultResult = Utils.OutputCode("");
+let defaultResult = Utils.OutputCode("", None);
 
 type compilerState = {
   code: string,
@@ -42,8 +42,14 @@ ReactDOMRe.renderToElementWithId(<Greeting />, "preview");|j};
 
 let getCode = (result) =>
   switch result {
-  | Utils.OutputCode(code) => code
+  | Utils.OutputCode(code, _) => code
   | Utils.ErrorMessage(_) => ""
+  };
+
+  let getWarnings = (result) =>
+  switch result {
+  | Utils.OutputCode(_, warnings) => warnings
+  | Utils.ErrorMessage(_) => None
   };
 
 let getError = (compilerResult) =>
@@ -87,7 +93,7 @@ let refmtML2RE = (ocamlJsxCode) => {
     };
   (
     reasonCode,
-    Utils.OutputCode(ocamlJsxCode),
+    Utils.OutputCode(ocamlJsxCode, None),
     jsxv2Result,
     ocamlResult,
     Persister.OCamlJsx(ocamlJsxCode)
@@ -213,7 +219,7 @@ let make = (_children) => {
       let rewriteResult = Utils.jsxv2Rewrite(code);
       let ocamlResult =
         switch rewriteResult {
-        | Utils.OutputCode(ocamlCode) => Utils.compileOCaml(ocamlCode)
+        | Utils.OutputCode(ocamlCode, _) => Utils.compileOCaml(ocamlCode)
         | Utils.ErrorMessage(_) => defaultResult
         };
       (self.state.reason.result, rewriteResult, ocamlResult)
@@ -222,7 +228,7 @@ let make = (_children) => {
       let reasonResult = Utils.refmtRE2ML(code);
       let (rewriteResult, ocamlResult) =
         switch reasonResult {
-        | Utils.OutputCode(jsxv2Code) =>
+        | Utils.OutputCode(jsxv2Code, _) =>
           let (_, rewriteResult, ocamlResult) = rewriteJsxV2(jsxv2Code);
           (rewriteResult, ocamlResult)
         | Utils.ErrorMessage(_) => (defaultResult, defaultResult)
@@ -234,10 +240,10 @@ let make = (_children) => {
       let reasonResult = Utils.refmtML2RE(code);
       let reasonCode =
         switch reasonResult {
-        | Utils.OutputCode(code) => code
+        | Utils.OutputCode(code, _) => code
         | Utils.ErrorMessage(_) => self.state.reason.code
         };
-      (reasonCode, Utils.OutputCode(code), rewriteResult, ocamlResult)
+      (reasonCode, Utils.OutputCode(code, None), rewriteResult, ocamlResult)
     };
     let onReasonChange = (code, _change) =>
       self.reduce((_event) => UpdateReason(refmtRE2ML(code)), ());
@@ -247,7 +253,7 @@ let make = (_children) => {
     let debouncedOnOCamlJsxChange = Utils.debounce(onOCamlJsxChange, ~wait=250.0);
     let (jsCode, jsErrorMessage) =
       switch self.state.ocaml.result {
-      | Utils.OutputCode(jsCode) => (jsCode, None)
+      | Utils.OutputCode(jsCode, _) => (jsCode, None)
       | Utils.ErrorMessage(errorMessage) => ("", Some(errorMessage))
       };
     let buildCodeEditor = (~onChange=?, compilerState, label, mode) =>
@@ -258,6 +264,7 @@ let make = (_children) => {
           mode
           code=compilerState.code
           error=?(getError(compilerState.result))
+          warnings=?(getWarnings(compilerState.result))
           ?onChange
           readOnly
         />

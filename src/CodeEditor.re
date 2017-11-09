@@ -52,7 +52,7 @@ let errorBodyStyle = ReactDOMRe.Style.make(~fontFamily="monospace", ~fontSize="1
 
 let errorStyle = ReactDOMRe.Style.make(~backgroundColor="#faa", ~padding="10px 20px", ());
 
-let make = (~label, ~mode, ~loading=false, ~code=?, ~error=?, ~onChange=?, ~readOnly=?, _children) => {
+let make = (~label, ~mode, ~loading=false, ~code=?, ~error=?, ~warnings=?, ~onChange=?, ~readOnly=?, _children) => {
   ...component,
   render: (_self) => {
     let options = {"lineNumbers": Js.Boolean.to_js_boolean(true)};
@@ -73,6 +73,7 @@ let make = (~label, ~mode, ~loading=false, ~code=?, ~error=?, ~onChange=?, ~read
       <div style=labelStyle> (ReasonReact.stringToElement(label)) </div>
       <CodeMirror value=?code ?onChange options preservePositionScroll=true />
       <Error errorMessage=?error />
+      <Warnings warnings=?warnings />
     </div>
   }
 };

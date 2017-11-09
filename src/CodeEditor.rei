@@ -9,6 +9,7 @@ let make:
     ~loading: bool=?,
     ~code: string=?,
     ~error: string=?,
+    ~warnings: string=?,
     ~onChange: (string, CodeMirror.change) => unit=?,
     ~readOnly: bool=?,
     array(ReasonReact.reactElement)

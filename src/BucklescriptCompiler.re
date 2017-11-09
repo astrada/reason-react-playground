@@ -18,4 +18,23 @@ type compilerResult = {
 
 [@bs.val] [@bs.scope "JSON"] external parse : string => compilerResult = "";
 
-let compile = (code) => parse(compile(ocaml, code));
+type console;
+
+type consoleError = string => unit;
+
+[@bs.val] external console : console = "";
+
+[@bs.get] external getConsoleError : console => consoleError = "error";
+
+[@bs.set] external setConsoleError : (console, consoleError) => unit = "error";
+
+let compile = (code) => {
+  let warningArray = ref([||]);
+  let outputWarning = (s) => Js.Array.push(s, warningArray^) |> ignore;
+  let standardConsoleError = getConsoleError(console);
+  setConsoleError(console, outputWarning);
+  let compilerResult = parse(compile(ocaml, code));
+  setConsoleError(console, standardConsoleError);
+  let warnings = Js.Array.joinWith("\n", warningArray^);
+  (compilerResult, warnings)
+};
