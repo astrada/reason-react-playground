@@ -48,10 +48,6 @@ let loadingMaskStyle =
     ()
   );
 
-let errorBodyStyle = ReactDOMRe.Style.make(~fontFamily="monospace", ~fontSize="12pt", ());
-
-let errorStyle = ReactDOMRe.Style.make(~backgroundColor="#faa", ~padding="10px 20px", ());
-
 let make = (~label, ~mode, ~loading=false, ~code=?, ~error=?, ~warnings=?, ~onChange=?, ~readOnly=?, _children) => {
   ...component,
   render: (_self) => {
