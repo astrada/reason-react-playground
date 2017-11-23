@@ -104,7 +104,7 @@ Based on:
   * [ReasonML playground](https://reasonml.github.io/try/)
   * [BuckleScript
     playground](https://github.com/BuckleScript/bucklescript-playground)
-  * [react-toolbox.com](http://react-toolbox.com/)
+  * [react-toolbox.io](http://react-toolbox.io/)
 
 Thanks to [Hongbo Zhang](https://github.com/bobzhang) and to [Cheng
 Lou](https://github.com/chenglou) for reviewing my patches. Thanks to the
