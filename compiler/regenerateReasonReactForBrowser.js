@@ -9,6 +9,10 @@ const browserify = require('browserify');
 
 const b = browserify();
 
+function uncapitalize(s) {
+  return s.charAt(0).toLowerCase() + s.substr(1);
+}
+
 const reactFile = path.join(__dirname, '..', 'node_modules', 'reason-react', 'node_modules', 'react', 'index.js');
 b.require(reactFile, {expose: "react"});
 
@@ -23,7 +27,7 @@ try {
 };
 reasonReactDirFiles.forEach(file => {
   //const exposedRequireName = path.join('reason-react', 'lib', 'js', 'src', path.basename(file, '.js'));
-  const exposedRequireName = path.join('stdlib', path.basename(file, '.js'));
+  const exposedRequireName = path.join('stdlib', uncapitalize(path.basename(file, '.js')));
   b.require(path.join(reasonReactDir, file), {expose: exposedRequireName});
 });
 

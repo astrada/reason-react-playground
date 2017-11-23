@@ -11,11 +11,11 @@
     "localforage": "^1.5.2",
     "lodash.debounce": "^4.0.8",
     "lz-string": "^1.4.4",
-    "react": "^15.6.1",
-    "react-dom": "^15.6.1",
+    "react": "^16.1.1",
+    "react-dom": "^16.1.1",
     "react-toolbox": "^2.0.0-beta.12",
     "reason": "^3.0.0",
-    "reason-scripts": "^0.6.9",
+    "reason-scripts": "^0.7.0",
     "vow": "https://github.com/wokalski/vow.git"
   },
   "scripts": {
@@ -32,8 +32,8 @@
     "bs-jest": "^0.1.0",
     "deamdify": "^0.3.0",
     "react-toolbox-themr": "^1.0.2",
-    "reason-react": "^0.2.4",
-    "reason-react-toolbox": "^0.3.0",
+    "reason-react": "^0.3.0",
+    "reason-react-toolbox": "^0.4.0",
     "uglifyify": "^4.0.4"
   }
 }

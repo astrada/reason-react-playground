@@ -7,24 +7,24 @@ const bin2js = require('./bin2js');
 const reasonReactDir = path.join('..', 'node_modules', 'reason-react', 'lib', 'bs', 'src');
 const modules = [
   {
-    cmi: path.join(reasonReactDir, 'reactDOMRe.cmi'),
-    cmj: path.join(reasonReactDir, 'reactDOMRe.cmj')
+    cmi: path.join(reasonReactDir, 'ReactDOMRe.cmi'),
+    cmj: path.join(reasonReactDir, 'ReactDOMRe.cmj')
   },
   {
-    cmi: path.join(reasonReactDir, 'reactDOMServerRe.cmi'),
-    cmj: path.join(reasonReactDir, 'reactDOMServerRe.cmj'),
+    cmi: path.join(reasonReactDir, 'ReactDOMServerRe.cmi'),
+    cmj: path.join(reasonReactDir, 'ReactDOMServerRe.cmj'),
   },
   {
-    cmi: path.join(reasonReactDir, 'reactEventRe.cmi'),
-    cmj: path.join(reasonReactDir, 'reactEventRe.cmj'),
+    cmi: path.join(reasonReactDir, 'ReactEventRe.cmi'),
+    cmj: path.join(reasonReactDir, 'ReactEventRe.cmj'),
   },
   {
-    cmi: path.join(reasonReactDir, 'reasonReact.cmi'),
-    cmj: path.join(reasonReactDir, 'reasonReact.cmj'),
+    cmi: path.join(reasonReactDir, 'ReasonReact.cmi'),
+    cmj: path.join(reasonReactDir, 'ReasonReact.cmj'),
   },
   {
-    cmi: path.join(reasonReactDir, 'reasonReactOptimizedCreateClass.cmi'),
-    cmj: path.join(reasonReactDir, 'reasonReactOptimizedCreateClass.cmj'),
+    cmi: path.join(reasonReactDir, 'ReasonReactOptimizedCreateClass.cmi'),
+    cmj: path.join(reasonReactDir, 'ReasonReactOptimizedCreateClass.cmj'),
   },
 ];
 
@@ -34,7 +34,7 @@ modules.forEach(module => {
   const cmi = module.cmi
   const cmiBasename = path.basename(cmi);
   fs.writeFileSync(jsName,
-                   `ocaml.load_module("/cmis/${cmiBasename}", `,
+                   `ocaml.load_module("/static/cmis/${cmiBasename}", `,
                    {flag: 'a'});
   bin2js.serializeBinary(cmi, jsName);
   const cmj = module.cmj
