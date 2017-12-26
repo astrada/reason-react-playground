@@ -6,7 +6,7 @@
   "author": "Alessandro Strada",
   "license": "MIT",
   "dependencies": {
-    "@skidding/react-codemirror": "^1.0.1",
+    "@skidding/react-codemirror": "1.0.1",
     "codemirror": "5.29.0",
     "localforage": "^1.5.2",
     "lodash.debounce": "^4.0.8",
