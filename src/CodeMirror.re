@@ -1,6 +1,7 @@
 [%bs.raw {|require('codemirror/lib/codemirror.css')|}];
 
-[@bs.module] external reactClass : ReasonReact.reactClass = "@skidding/react-codemirror";
+[@bs.module]
+external reactClass : ReasonReact.reactClass = "@skidding/react-codemirror";
 
 [%bs.raw {|require('codemirror/mode/javascript/javascript')|}];
 
@@ -18,11 +19,19 @@ type scrollInfo = {
   "clientHeight": float
 };
 
-type position = {. "line": float, "ch": float};
+type position = {
+  .
+  "line": float,
+  "ch": float
+};
 
 type change = {
   .
-  "from": position, "_to": position, "text": array(string), "removed": string, "origin": string
+  "from": position,
+  "_to": position,
+  "text": array(string),
+  "removed": string,
+  "origin": string
 };
 
 let make =
@@ -32,7 +41,7 @@ let make =
       ~className: option(string)=?,
       ~defaultValue: option(string)=?,
       ~options: option(Js.t({..}))=?,
-      ~onChange: option(((string, change) => unit))=?,
+      ~onChange: option((string, change) => unit)=?,
       ~onCursorActivity: option(ReasonReact.Callback.t(Js.t({..})))=?,
       ~onFocusChange: option(ReasonReact.Callback.t(Js.boolean))=?,
       ~onScroll: option(ReasonReact.Callback.t(scrollInfo))=?,
@@ -43,8 +52,14 @@ let make =
   ReasonReact.wrapJsForReason(
     ~reactClass,
     ~props={
-      "autoFocus": Js.Nullable.from_opt(Utils.optionMap(Js.Boolean.to_js_boolean, autoFocus)),
-      "autoSave": Js.Nullable.from_opt(Utils.optionMap(Js.Boolean.to_js_boolean, autoSave)),
+      "autoFocus":
+        Js.Nullable.from_opt(
+          Utils.optionMap(Js.Boolean.to_js_boolean, autoFocus)
+        ),
+      "autoSave":
+        Js.Nullable.from_opt(
+          Utils.optionMap(Js.Boolean.to_js_boolean, autoSave)
+        ),
       "className": Js.Nullable.from_opt(className),
       "defaultValue": Js.Nullable.from_opt(defaultValue),
       "options": Js.Nullable.from_opt(options),
@@ -53,7 +68,9 @@ let make =
       "onFocusChange": Js.Nullable.from_opt(onFocusChange),
       "onScroll": Js.Nullable.from_opt(onScroll),
       "preservePositionScroll":
-        Js.Nullable.from_opt(Utils.optionMap(Js.Boolean.to_js_boolean, preservePositionScroll)),
+        Js.Nullable.from_opt(
+          Utils.optionMap(Js.Boolean.to_js_boolean, preservePositionScroll)
+        ),
       "value": Js.Nullable.from_opt(value)
     },
     children

@@ -29,47 +29,49 @@ let component = ReasonReact.reducerComponentWithRetainedProps("Preview");
 let executeCode = (self: ReasonReact.self(state, retainedProps, action)) => {
   let code = self.ReasonReact.retainedProps.code;
   let evalResult = Utils.evalJs(code);
-  self.reduce((_) => UpdateEvalResult(evalResult), ())
+  self.send(UpdateEvalResult(evalResult));
 };
 
-let make = (~code, ~className=?, ~onDone: option((bool => unit))=?, _children) => {
+let make = (~code, ~className=?, ~onDone: option(bool => unit)=?, _children) => {
   ...component,
-  retainedProps: {code: code},
+  retainedProps: {
+    code: code
+  },
   initialState: () => {evalResult: Utils.Success, evaluatingJs: false},
   reducer: (action, state) =>
-    switch action {
+    switch (action) {
     | UpdateEvalResult(evalResult) =>
       ReasonReact.UpdateWithSideEffects(
         {...state, evalResult, evaluatingJs: false},
         (
-          (self) => {
+          self => {
             let error = self.state.evalResult != Utils.Success;
-            switch onDone {
+            switch (onDone) {
             | Some(onDone) => onDone(error)
             | None => ()
-            }
+            };
           }
         )
       )
     },
-  didMount: (self) => {
+  didMount: self => {
     executeCode(self);
-    ReasonReact.NoUpdate
+    ReasonReact.NoUpdate;
   },
   didUpdate: ({oldSelf, newSelf}) =>
     if (oldSelf.retainedProps.code !== newSelf.retainedProps.code) {
-      executeCode(newSelf)
+      executeCode(newSelf);
     },
   render: (self: ReasonReact.self(state, retainedProps, action)) => {
     let className = Js.Option.getWithDefault("", className);
     let errorMessage =
-      switch self.state.evalResult {
+      switch (self.state.evalResult) {
       | Utils.Success => None
       | Utils.ErrorMessage(e) => Some(e)
       };
     <div className style=previewContainerStyle>
       <div id="preview" style=previewStyle />
       <Error ?errorMessage />
-    </div>
+    </div>;
   }
 };

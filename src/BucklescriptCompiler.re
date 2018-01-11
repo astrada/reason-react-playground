@@ -34,34 +34,37 @@ let warningEndRegex = [%re "/^$/"];
 
 let warningToExcludeRegex = [%re "/Warning 40/"];
 
-let compile = (code) => {
+let compile = code => {
   let filteredWarnings = ref([||]);
-  let filterBuckleScriptWarnings = (warningLine) => {
+  let filterBuckleScriptWarnings = warningLine => {
     if (Js.Re.test(warningLine, warningStartRegex)) {
-      filteredWarnings := [||]
+      filteredWarnings := [||];
     };
     Js.Array.push(warningLine, filteredWarnings^) |> ignore;
     if (Js.Re.test(warningLine, warningEndRegex)) {
-      if (Js.Array.some((line) => Js.Re.test(line, warningToExcludeRegex), filteredWarnings^)) {
-        [||]
+      if (Js.Array.some(
+            line => Js.Re.test(line, warningToExcludeRegex),
+            filteredWarnings^
+          )) {
+        [||];
       } else {
-        filteredWarnings^
-      }
+        filteredWarnings^;
+      };
     } else {
-      [||]
-    }
+      [||];
+    };
   };
   let warningArray = ref([||]);
-  let outputWarning = (s) => {
+  let outputWarning = s => {
     let warnings = filterBuckleScriptWarnings(s);
     if (Js.Array.length(warnings) > 0) {
-      warningArray := Js.Array.concat(warnings, warningArray^)
-    }
+      warningArray := Js.Array.concat(warnings, warningArray^);
+    };
   };
   let standardConsoleError = getConsoleError(console);
   setConsoleError(console, outputWarning);
   let compilerResult = parse(compile(ocaml, code));
   setConsoleError(console, standardConsoleError);
   let warnings = Js.Array.joinWith("\n", warningArray^);
-  (compilerResult, warnings)
+  (compilerResult, warnings);
 };

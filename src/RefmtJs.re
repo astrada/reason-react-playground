@@ -14,7 +14,11 @@ type location = {
   "endLineEndChar": Js.nullable(int)
 };
 
-type parseError = {. "message": Js.nullable(string), "location": Js.nullable(location)};
+type parseError = {
+  .
+  "message": Js.nullable(string),
+  "location": Js.nullable(location)
+};
 
 external toParseError : Js.Exn.t => parseError = "%identity";
 
@@ -28,52 +32,58 @@ external toParseError : Js.Exn.t => parseError = "%identity";
 
 let errorCodeRegex = [%re "/^[0-9]+: /"];
 
-let filterErrorCodeInErrorMessage = (e) => {
+let filterErrorCodeInErrorMessage = e => {
   let message = Js.Option.getWithDefault("", Js.Exn.message(e));
-  Js.String.replaceByRe(errorCodeRegex, "", message)
+  Js.String.replaceByRe(errorCodeRegex, "", message);
 };
 
-let buildErrorMessage = (e) => {
+let buildErrorMessage = e => {
   let parseError = toParseError(e);
   switch (Js.toOption(parseError##location)) {
   | Some(location) =>
     let sl = Js.Option.getWithDefault(0, Js.toOption(location##startLine));
     let el = Js.Option.getWithDefault(0, Js.toOption(location##endLine));
-    let slsc = Js.Option.getWithDefault(0, Js.toOption(location##startLineStartChar));
-    let elec = Js.Option.getWithDefault(0, Js.toOption(location##endLineEndChar));
+    let slsc =
+      Js.Option.getWithDefault(0, Js.toOption(location##startLineStartChar));
+    let elec =
+      Js.Option.getWithDefault(0, Js.toOption(location##endLineEndChar));
     let locationMessage =
       if (sl == el) {
         if (slsc == elec) {
-          {j|Line $sl, $slsc|j}
+          {j|Line $sl, $slsc|j};
         } else {
-          {j|Line $sl, $slsc-$elec|j}
-        }
+          {j|Line $sl, $slsc-$elec|j};
+        };
       } else {
-        {j|Line $sl, $slsc-Line $el, $elec|j}
+        {j|Line $sl, $slsc-Line $el, $elec|j};
       };
-    locationMessage ++ ": " ++ filterErrorCodeInErrorMessage(e)
+    locationMessage ++ ": " ++ filterErrorCodeInErrorMessage(e);
   | None => "Syntax error"
-  }
+  };
 };
 
-let refmtRE2ML = (code) =>
-  try {
-    let astAndComments = parseRE(code);
-    let ocamlCode = printML(astAndComments);
-    {ocamlCode: Some(ocamlCode), reasonCode: None, errorMessage: None}
-  } {
+let refmtRE2ML = code =>
+  try (
+    {
+      let astAndComments = parseRE(code);
+      let ocamlCode = printML(astAndComments);
+      {ocamlCode: Some(ocamlCode), reasonCode: None, errorMessage: None};
+    }
+  ) {
   | Js.Exn.Error(e) =>
     let errorMessage = buildErrorMessage(e);
-    {ocamlCode: None, reasonCode: None, errorMessage: Some(errorMessage)}
+    {ocamlCode: None, reasonCode: None, errorMessage: Some(errorMessage)};
   };
 
-let refmtML2RE = (code) =>
-  try {
-    let astAndComments = parseML(code);
-    let reasonCode = printRE(astAndComments);
-    {ocamlCode: None, reasonCode: Some(reasonCode), errorMessage: None}
-  } {
+let refmtML2RE = code =>
+  try (
+    {
+      let astAndComments = parseML(code);
+      let reasonCode = printRE(astAndComments);
+      {ocamlCode: None, reasonCode: Some(reasonCode), errorMessage: None};
+    }
+  ) {
   | Js.Exn.Error(e) =>
     let errorMessage = buildErrorMessage(e);
-    {ocamlCode: None, reasonCode: None, errorMessage: Some(errorMessage)}
+    {ocamlCode: None, reasonCode: None, errorMessage: Some(errorMessage)};
   };

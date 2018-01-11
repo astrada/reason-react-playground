@@ -18,4 +18,4 @@ type compilerResult = {
 
 [@bs.val] [@bs.scope "JSON"] external parse : string => compilerResult = "";
 
-let rewrite = (code) => parse(rewrite(jsxv2, code));
+let rewrite = code => parse(rewrite(jsxv2, code));
