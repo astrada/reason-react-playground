@@ -5,8 +5,6 @@ type code =
   | Reason(string)
   | OCamlJsx(string);
 
-type jsData = {. language: string, code: string};
-
 let reasonLabel = "reason";
 
 let ocamlJsxLabel = "ocaml-jsx";

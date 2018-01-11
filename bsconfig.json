@@ -5,14 +5,15 @@
   ],
   "bs-dependencies": [
     "reason-react",
-    "reason-react-toolbox",
+    "@astrada/reason-react-toolbox",
     "vow"
   ],
   "bs-dev-dependencies": [
-    "bs-jest"
+    "@glennsl/bs-jest"
   ],
   "reason": {
     "react-jsx": 2
   },
-  "refmt": 3
+  "refmt": 3,
+  "bsc-flags": ["-w", "-23"]
 }
