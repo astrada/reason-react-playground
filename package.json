@@ -7,6 +7,7 @@
   "license": "MIT",
   "dependencies": {
     "@skidding/react-codemirror": "1.0.1",
+    "@wokalski/vow": "https://github.com/wokalski/vow.git",
     "codemirror": "5.29.0",
     "localforage": "^1.5.2",
     "lodash.debounce": "^4.0.8",
@@ -28,12 +29,12 @@
     "toolbox": "react-toolbox-themr"
   },
   "devDependencies": {
-    "browserify": "^14.4.0",
+    "@astrada/reason-react-toolbox": "^0.4.2",
     "@glennsl/bs-jest": "^0.3.2",
+    "browserify": "^14.4.0",
     "deamdify": "^0.3.0",
     "react-toolbox-themr": "^1.0.2",
     "reason-react": "^0.3.1",
-    "@astrada/reason-react-toolbox": "^0.4.2",
     "uglifyify": "^4.0.4"
   }
 }
