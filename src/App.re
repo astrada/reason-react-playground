@@ -130,7 +130,7 @@ let refmtML2RE = ocamlJsxCode => {
 
 let initialVow = {
   let initialCodeVow = Persister.loadPersistedState();
-  Vow.Result.map(
+  Vow.Result.flatMap(
     fun
     | Persister.Null => Vow.Result.return(refmtRE2ML(defaultReasonCode))
     | Persister.Reason(reasonCode) => Vow.Result.return(refmtRE2ML(reasonCode))

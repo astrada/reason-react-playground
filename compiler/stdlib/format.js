@@ -1,6 +1,6 @@
 'use strict';
 define(["exports", "./block.js", "./bytes.js", "./curry.js", "./buffer.js", "./string.js", "./caml_io.js", "./caml_obj.js", "./pervasives.js", "./caml_string.js", "./caml_primitive.js", "./caml_exceptions.js", "./camlinternalFormat.js", "./caml_builtin_exceptions.js"],
-  function(exports, Block, Bytes, Curry, Buffer, $$String, Caml_io, Caml_obj, Pervasives, Caml_string, Caml_primitive, Caml_exceptions, CamlinternalFormat, Caml_builtin_exceptions){
+  function(exports, Block, Bytes, Curry, $$Buffer, $$String, Caml_io, Caml_obj, Pervasives, Caml_string, Caml_primitive, Caml_exceptions, CamlinternalFormat, Caml_builtin_exceptions){
     'use strict';
     function add_queue(x, q) {
       var c = /* Cons */[/* record */[
@@ -127,7 +127,6 @@ define(["exports", "./block.js", "./bytes.js", "./curry.js", "./buffer.js", "./s
               } else {
                 return /* () */0;
               }
-              break;
           case 1 : 
               var match$1 = state[/* pp_format_stack */1];
               if (match$1) {
@@ -172,7 +171,6 @@ define(["exports", "./block.js", "./bytes.js", "./curry.js", "./buffer.js", "./s
               } else {
                 return /* () */0;
               }
-              break;
           
         }
       } else {
@@ -213,7 +211,6 @@ define(["exports", "./block.js", "./bytes.js", "./curry.js", "./buffer.js", "./s
               } else {
                 return /* () */0;
               }
-              break;
           case 2 : 
               var insertion_point = state[/* pp_margin */5] - state[/* pp_space_left */8] | 0;
               var match$8 = state[/* pp_tbox_stack */2];
@@ -229,7 +226,6 @@ define(["exports", "./block.js", "./bytes.js", "./curry.js", "./buffer.js", "./s
                       } else {
                         _param = param[1];
                         continue ;
-                        
                       }
                     } else {
                       throw Caml_builtin_exceptions.not_found;
@@ -261,7 +257,6 @@ define(["exports", "./block.js", "./bytes.js", "./curry.js", "./buffer.js", "./s
               } else {
                 return /* () */0;
               }
-              break;
           case 3 : 
               var ty = param[1];
               var insertion_point$1 = state[/* pp_margin */5] - state[/* pp_space_left */8] | 0;
@@ -313,7 +308,6 @@ define(["exports", "./block.js", "./bytes.js", "./curry.js", "./buffer.js", "./s
             format_pp_token(state$1, size < 0 ? 1000000010 : size, match[/* token */1]);
             state$1[/* pp_left_total */11] = match[/* length */2] + state$1[/* pp_left_total */11] | 0;
             continue ;
-            
           }
         };
       }
@@ -581,7 +575,7 @@ define(["exports", "./block.js", "./bytes.js", "./curry.js", "./buffer.js", "./s
     }
     
     function pp_print_int(state, i) {
-      return pp_print_string(state, "" + i);
+      return pp_print_string(state, String(i));
     }
     
     function pp_print_float(state, f) {
@@ -689,19 +683,15 @@ define(["exports", "./block.js", "./bytes.js", "./curry.js", "./buffer.js", "./s
     }
     
     function pp_close_tbox(state, _) {
-      if (state[/* pp_curr_depth */13] > 1) {
-        if (state[/* pp_curr_depth */13] < state[/* pp_max_boxes */14]) {
-          var elem = /* record */[
-            /* elem_size */0,
-            /* token : Pp_tend */2,
-            /* length */0
-          ];
-          enqueue_advance(state, elem);
-          state[/* pp_curr_depth */13] = state[/* pp_curr_depth */13] - 1 | 0;
-          return /* () */0;
-        } else {
-          return 0;
-        }
+      if (state[/* pp_curr_depth */13] > 1 && state[/* pp_curr_depth */13] < state[/* pp_max_boxes */14]) {
+        var elem = /* record */[
+          /* elem_size */0,
+          /* token : Pp_tend */2,
+          /* length */0
+        ];
+        enqueue_advance(state, elem);
+        state[/* pp_curr_depth */13] = state[/* pp_curr_depth */13] - 1 | 0;
+        return /* () */0;
       } else {
         return 0;
       }
@@ -754,7 +744,6 @@ define(["exports", "./block.js", "./bytes.js", "./curry.js", "./buffer.js", "./s
             _param = vs;
             _$staropt$star = /* Some */[pp_sep];
             continue ;
-            
           } else {
             return Curry._2(pp_v, ppf, v);
           }
@@ -923,7 +912,6 @@ define(["exports", "./block.js", "./bytes.js", "./curry.js", "./buffer.js", "./s
             Curry._3(state[/* pp_out_string */16], blank_line, 0, 80);
             _n = n - 80 | 0;
             continue ;
-            
           }
         } else {
           return 0;
@@ -1041,13 +1029,13 @@ define(["exports", "./block.js", "./bytes.js", "./curry.js", "./buffer.js", "./s
     
     function formatter_of_buffer(b) {
       return make_formatter((function (param, param$1, param$2) {
-                    return Buffer.add_substring(b, param, param$1, param$2);
+                    return $$Buffer.add_substring(b, param, param$1, param$2);
                   }), (function () {
                     return /* () */0;
                   }));
     }
     
-    var stdbuf = Buffer.create(512);
+    var stdbuf = $$Buffer.create(512);
     
     var std_formatter = formatter_of_out_channel(Pervasives.stdout);
     
@@ -1057,15 +1045,15 @@ define(["exports", "./block.js", "./bytes.js", "./curry.js", "./buffer.js", "./s
     
     function flush_str_formatter() {
       pp_flush_queue(str_formatter, /* false */0);
-      var s = Buffer.contents(stdbuf);
-      Buffer.reset(stdbuf);
+      var s = $$Buffer.contents(stdbuf);
+      $$Buffer.reset(stdbuf);
       return s;
     }
     
     function flush_buf_formatter(buf, ppf) {
       pp_flush_queue(ppf, /* false */0);
-      var s = Buffer.contents(buf);
-      Buffer.reset(buf);
+      var s = $$Buffer.contents(buf);
+      $$Buffer.reset(buf);
       return s;
     }
     
@@ -1110,7 +1098,7 @@ define(["exports", "./block.js", "./bytes.js", "./curry.js", "./buffer.js", "./s
     }
     
     function print_int(param) {
-      return pp_print_string(std_formatter, "" + param);
+      return pp_print_string(std_formatter, String(param));
     }
     
     function print_float(param) {
@@ -1269,15 +1257,15 @@ define(["exports", "./block.js", "./bytes.js", "./curry.js", "./buffer.js", "./s
     }
     
     function compute_tag(output, tag_acc) {
-      var buf = Buffer.create(16);
+      var buf = $$Buffer.create(16);
       var ppf = formatter_of_buffer(buf);
       Curry._2(output, ppf, tag_acc);
       pp_print_flush(ppf, /* () */0);
       var len = buf[/* position */1];
       if (len < 2) {
-        return Buffer.contents(buf);
+        return $$Buffer.contents(buf);
       } else {
-        return Buffer.sub(buf, 1, len - 2 | 0);
+        return $$Buffer.sub(buf, 1, len - 2 | 0);
       }
     }
     
@@ -1339,25 +1327,20 @@ define(["exports", "./block.js", "./bytes.js", "./curry.js", "./buffer.js", "./s
               } else {
                 return pp_open_tag(ppf, compute_tag(output_acc, match[0]));
               }
-              break;
           case 2 : 
               var p$3 = acc[0];
               var exit$1 = 0;
-              if (typeof p$3 === "number") {
-                exit$1 = 3;
-              } else if (p$3.tag) {
+              if (typeof p$3 === "number" || p$3.tag) {
                 exit$1 = 3;
               } else {
                 var match$2 = p$3[1];
-                if (typeof match$2 === "number") {
+                if (typeof match$2 === "number" || match$2.tag !== 1) {
                   exit$1 = 3;
-                } else if (match$2.tag === 1) {
+                } else {
                   p = p$3[0];
                   size = match$2[1];
                   s = acc[1];
                   exit = 1;
-                } else {
-                  exit$1 = 3;
                 }
               }
               if (exit$1 === 3) {
@@ -1368,21 +1351,17 @@ define(["exports", "./block.js", "./bytes.js", "./curry.js", "./buffer.js", "./s
           case 3 : 
               var p$4 = acc[0];
               var exit$2 = 0;
-              if (typeof p$4 === "number") {
-                exit$2 = 3;
-              } else if (p$4.tag) {
+              if (typeof p$4 === "number" || p$4.tag) {
                 exit$2 = 3;
               } else {
                 var match$3 = p$4[1];
-                if (typeof match$3 === "number") {
+                if (typeof match$3 === "number" || match$3.tag !== 1) {
                   exit$2 = 3;
-                } else if (match$3.tag === 1) {
+                } else {
                   p$1 = p$4[0];
                   size$1 = match$3[1];
                   c = acc[1];
                   exit = 2;
-                } else {
-                  exit$2 = 3;
                 }
               }
               if (exit$2 === 3) {
@@ -1393,21 +1372,17 @@ define(["exports", "./block.js", "./bytes.js", "./curry.js", "./buffer.js", "./s
           case 4 : 
               var p$5 = acc[0];
               var exit$3 = 0;
-              if (typeof p$5 === "number") {
-                exit$3 = 3;
-              } else if (p$5.tag) {
+              if (typeof p$5 === "number" || p$5.tag) {
                 exit$3 = 3;
               } else {
                 var match$4 = p$5[1];
-                if (typeof match$4 === "number") {
+                if (typeof match$4 === "number" || match$4.tag !== 1) {
                   exit$3 = 3;
-                } else if (match$4.tag === 1) {
+                } else {
                   p = p$5[0];
                   size = match$4[1];
                   s = acc[1];
                   exit = 1;
-                } else {
-                  exit$3 = 3;
                 }
               }
               if (exit$3 === 3) {
@@ -1418,21 +1393,17 @@ define(["exports", "./block.js", "./bytes.js", "./curry.js", "./buffer.js", "./s
           case 5 : 
               var p$6 = acc[0];
               var exit$4 = 0;
-              if (typeof p$6 === "number") {
-                exit$4 = 3;
-              } else if (p$6.tag) {
+              if (typeof p$6 === "number" || p$6.tag) {
                 exit$4 = 3;
               } else {
                 var match$5 = p$6[1];
-                if (typeof match$5 === "number") {
+                if (typeof match$5 === "number" || match$5.tag !== 1) {
                   exit$4 = 3;
-                } else if (match$5.tag === 1) {
+                } else {
                   p$1 = p$6[0];
                   size$1 = match$5[1];
                   c = acc[1];
                   exit = 2;
-                } else {
-                  exit$4 = 3;
                 }
               }
               if (exit$4 === 3) {
@@ -1491,25 +1462,20 @@ define(["exports", "./block.js", "./bytes.js", "./curry.js", "./buffer.js", "./s
               } else {
                 return pp_open_tag(ppf, compute_tag(strput_acc, match[0]));
               }
-              break;
           case 2 : 
               var p$3 = acc[0];
               var exit$1 = 0;
-              if (typeof p$3 === "number") {
-                exit$1 = 3;
-              } else if (p$3.tag) {
+              if (typeof p$3 === "number" || p$3.tag) {
                 exit$1 = 3;
               } else {
                 var match$2 = p$3[1];
-                if (typeof match$2 === "number") {
+                if (typeof match$2 === "number" || match$2.tag !== 1) {
                   exit$1 = 3;
-                } else if (match$2.tag === 1) {
+                } else {
                   p = p$3[0];
                   size = match$2[1];
                   s = acc[1];
                   exit = 1;
-                } else {
-                  exit$1 = 3;
                 }
               }
               if (exit$1 === 3) {
@@ -1520,21 +1486,17 @@ define(["exports", "./block.js", "./bytes.js", "./curry.js", "./buffer.js", "./s
           case 3 : 
               var p$4 = acc[0];
               var exit$2 = 0;
-              if (typeof p$4 === "number") {
-                exit$2 = 3;
-              } else if (p$4.tag) {
+              if (typeof p$4 === "number" || p$4.tag) {
                 exit$2 = 3;
               } else {
                 var match$3 = p$4[1];
-                if (typeof match$3 === "number") {
+                if (typeof match$3 === "number" || match$3.tag !== 1) {
                   exit$2 = 3;
-                } else if (match$3.tag === 1) {
+                } else {
                   p$1 = p$4[0];
                   size$1 = match$3[1];
                   c = acc[1];
                   exit = 2;
-                } else {
-                  exit$2 = 3;
                 }
               }
               if (exit$2 === 3) {
@@ -1545,21 +1507,17 @@ define(["exports", "./block.js", "./bytes.js", "./curry.js", "./buffer.js", "./s
           case 4 : 
               var p$5 = acc[0];
               var exit$3 = 0;
-              if (typeof p$5 === "number") {
-                exit$3 = 3;
-              } else if (p$5.tag) {
+              if (typeof p$5 === "number" || p$5.tag) {
                 exit$3 = 3;
               } else {
                 var match$4 = p$5[1];
-                if (typeof match$4 === "number") {
+                if (typeof match$4 === "number" || match$4.tag !== 1) {
                   exit$3 = 3;
-                } else if (match$4.tag === 1) {
+                } else {
                   p = p$5[0];
                   size = match$4[1];
                   s = acc[1];
                   exit = 1;
-                } else {
-                  exit$3 = 3;
                 }
               }
               if (exit$3 === 3) {
@@ -1570,21 +1528,17 @@ define(["exports", "./block.js", "./bytes.js", "./curry.js", "./buffer.js", "./s
           case 5 : 
               var p$6 = acc[0];
               var exit$4 = 0;
-              if (typeof p$6 === "number") {
-                exit$4 = 3;
-              } else if (p$6.tag) {
+              if (typeof p$6 === "number" || p$6.tag) {
                 exit$4 = 3;
               } else {
                 var match$5 = p$6[1];
-                if (typeof match$5 === "number") {
+                if (typeof match$5 === "number" || match$5.tag !== 1) {
                   exit$4 = 3;
-                } else if (match$5.tag === 1) {
+                } else {
                   p$1 = p$6[0];
                   size$1 = match$5[1];
                   c = acc[1];
                   exit = 2;
-                } else {
-                  exit$4 = 3;
                 }
               }
               if (exit$4 === 3) {
@@ -1595,19 +1549,15 @@ define(["exports", "./block.js", "./bytes.js", "./curry.js", "./buffer.js", "./s
           case 6 : 
               var p$7 = acc[0];
               var exit$5 = 0;
-              if (typeof p$7 === "number") {
-                exit$5 = 3;
-              } else if (p$7.tag) {
+              if (typeof p$7 === "number" || p$7.tag) {
                 exit$5 = 3;
               } else {
                 var match$6 = p$7[1];
-                if (typeof match$6 === "number") {
+                if (typeof match$6 === "number" || match$6.tag !== 1) {
                   exit$5 = 3;
-                } else if (match$6.tag === 1) {
+                } else {
                   strput_acc(ppf, p$7[0]);
                   return pp_print_as_size(ppf, match$6[1], Curry._1(acc[1], /* () */0));
-                } else {
-                  exit$5 = 3;
                 }
               }
               if (exit$5 === 3) {
@@ -1672,7 +1622,7 @@ define(["exports", "./block.js", "./bytes.js", "./curry.js", "./buffer.js", "./s
     }
     
     function ksprintf(k, param) {
-      var b = Buffer.create(512);
+      var b = $$Buffer.create(512);
       var ppf = formatter_of_buffer(b);
       var k$prime = function (_, acc) {
         strput_acc(ppf, acc);
@@ -1688,7 +1638,7 @@ define(["exports", "./block.js", "./bytes.js", "./curry.js", "./buffer.js", "./s
     }
     
     function asprintf(param) {
-      var b = Buffer.create(512);
+      var b = $$Buffer.create(512);
       var ppf = formatter_of_buffer(b);
       var k$prime = function (ppf, acc) {
         output_acc(ppf, acc);

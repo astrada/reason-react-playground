@@ -12,5 +12,5 @@ let evalJs = code =>
   ) {
   | Js.Exn.Error(e) =>
     %bs.obj
-    {errorMessage: Js.Nullable.from_opt(Js.Exn.message(e))}
+    {errorMessage: Js.Nullable.fromOption(Js.Exn.message(e))}
   };

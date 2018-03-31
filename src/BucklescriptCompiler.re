@@ -14,9 +14,7 @@ type compilerResult = {
 
 [@bs.val] external ocaml : compiler = "";
 
-[@bs.send] external compile : (compiler, string) => string = "";
-
-[@bs.val] [@bs.scope "JSON"] external parse : string => compilerResult = "";
+[@bs.send] external compile : (compiler, string) => compilerResult = "";
 
 type console;
 
@@ -63,7 +61,7 @@ let compile = code => {
   };
   let standardConsoleError = getConsoleError(console);
   setConsoleError(console, outputWarning);
-  let compilerResult = parse(compile(ocaml, code));
+  let compilerResult = compile(ocaml, code);
   setConsoleError(console, standardConsoleError);
   let warnings = Js.Array.joinWith("\n", warningArray^);
   (compilerResult, warnings);

@@ -123,7 +123,6 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
         if (match !== null) {
           _n = match;
           continue ;
-          
         } else {
           return n.key;
         }
@@ -153,7 +152,6 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
         if (match !== null) {
           _n = match;
           continue ;
-          
         } else {
           return n.key;
         }
@@ -183,7 +181,6 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
         if (match !== null) {
           _n = match;
           continue ;
-          
         } else {
           return /* tuple */[
                   n.key,
@@ -216,7 +213,6 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
         if (match !== null) {
           _n = match;
           continue ;
-          
         } else {
           return /* tuple */[
                   n.key,
@@ -275,7 +271,6 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
           ];
           _v = v.left;
           continue ;
-          
         } else {
           return s;
         }
@@ -290,7 +285,6 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
           f(n.key, n.value);
           _n = n.right;
           continue ;
-          
         } else {
           return /* () */0;
         }
@@ -356,7 +350,6 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
           _accu = f(reduceU(l, accu, f), v, d);
           _m = r;
           continue ;
-          
         } else {
           return accu;
         }
@@ -371,14 +364,9 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
       while(true) {
         var n = _n;
         if (n !== null) {
-          if (p(n.key, n.value)) {
-            if (everyU(n.left, p)) {
-              _n = n.right;
-              continue ;
-              
-            } else {
-              return /* false */0;
-            }
+          if (p(n.key, n.value) && everyU(n.left, p)) {
+            _n = n.right;
+            continue ;
           } else {
             return /* false */0;
           }
@@ -396,14 +384,11 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
       while(true) {
         var n = _n;
         if (n !== null) {
-          if (p(n.key, n.value)) {
-            return /* true */1;
-          } else if (someU(n.left, p)) {
+          if (p(n.key, n.value) || someU(n.left, p)) {
             return /* true */1;
           } else {
             _n = n.right;
             continue ;
-            
           }
         } else {
           return /* false */0;
@@ -574,21 +559,24 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
       }
     }
     
-    function toListAux(_accu, _n) {
+    function toListAux(_n, _accu) {
       while(true) {
-        var n = _n;
         var accu = _accu;
+        var n = _n;
         if (n !== null) {
-          _n = n.left;
+          var l = n.left;
+          var r = n.right;
+          var k = n.key;
+          var v = n.value;
           _accu = /* :: */[
             /* tuple */[
-              n.key,
-              n.value
+              k,
+              v
             ],
-            toListAux(accu, n.right)
+            toListAux(r, accu)
           ];
+          _n = l;
           continue ;
-          
         } else {
           return accu;
         }
@@ -596,7 +584,7 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
     }
     
     function toList(s) {
-      return toListAux(/* [] */0, s);
+      return toListAux(s, /* [] */0);
     }
     
     function checkInvariantInternal(_v) {
@@ -607,12 +595,11 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
           var r = v.right;
           var diff = treeHeight(l) - treeHeight(r) | 0;
           if (!(diff <= 2 && diff >= -2)) {
-            throw new Error("File \"belt_internalAVLtree.ml\", line 368, characters 6-12");
+            throw new Error("File \"belt_internalAVLtree.ml\", line 369, characters 6-12");
           }
           checkInvariantInternal(l);
           _v = r;
           continue ;
-          
         } else {
           return /* () */0;
         }
@@ -633,7 +620,6 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
           _i = rnext;
           _n = r;
           continue ;
-          
         } else {
           return rnext;
         }
@@ -653,7 +639,6 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
           _i = rnext;
           _n = r;
           continue ;
-          
         } else {
           return rnext;
         }
@@ -677,7 +662,6 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
           _i = rnext;
           _n = r;
           continue ;
-          
         } else {
           return rnext;
         }
@@ -717,12 +701,12 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
       }
     }
     
-    function ofSortedArrayRevAux(arr, off, len) {
+    function fromSortedArrayRevAux(arr, off, len) {
       if (len > 3 || len < 0) {
         var nl = len / 2 | 0;
-        var left = ofSortedArrayRevAux(arr, off, nl);
+        var left = fromSortedArrayRevAux(arr, off, nl);
         var match = arr[off - nl | 0];
-        var right = ofSortedArrayRevAux(arr, (off - nl | 0) - 1 | 0, (len - nl | 0) - 1 | 0);
+        var right = fromSortedArrayRevAux(arr, (off - nl | 0) - 1 | 0, (len - nl | 0) - 1 | 0);
         return create(left, match[0], match[1], right);
       } else {
         switch (len) {
@@ -762,12 +746,12 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
       }
     }
     
-    function ofSortedArrayAux(arr, off, len) {
+    function fromSortedArrayAux(arr, off, len) {
       if (len > 3 || len < 0) {
         var nl = len / 2 | 0;
-        var left = ofSortedArrayAux(arr, off, nl);
+        var left = fromSortedArrayAux(arr, off, nl);
         var match = arr[off + nl | 0];
-        var right = ofSortedArrayAux(arr, (off + nl | 0) + 1 | 0, (len - nl | 0) - 1 | 0);
+        var right = fromSortedArrayAux(arr, (off + nl | 0) + 1 | 0, (len - nl | 0) - 1 | 0);
         return create(left, match[0], match[1], right);
       } else {
         switch (len) {
@@ -807,8 +791,8 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
       }
     }
     
-    function ofSortedArrayUnsafe(arr) {
-      return ofSortedArrayAux(arr, 0, arr.length);
+    function fromSortedArrayUnsafe(arr) {
+      return fromSortedArrayAux(arr, 0, arr.length);
     }
     
     function cmpU(s1, s2, kcmp, vcmp) {
@@ -822,26 +806,21 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
         while(true) {
           var e2 = _e2;
           var e1 = _e1;
-          if (e1) {
-            if (e2) {
-              var h2 = e2[0];
-              var h1 = e1[0];
-              var c = kcmp$1(h1.key, h2.key);
-              if (c === 0) {
-                var cx = vcmp$1(h1.value, h2.value);
-                if (cx === 0) {
-                  _e2 = stackAllLeft(h2.right, e2[1]);
-                  _e1 = stackAllLeft(h1.right, e1[1]);
-                  continue ;
-                  
-                } else {
-                  return cx;
-                }
+          if (e1 && e2) {
+            var h2 = e2[0];
+            var h1 = e1[0];
+            var c = kcmp$1(h1.key, h2.key);
+            if (c === 0) {
+              var cx = vcmp$1(h1.value, h2.value);
+              if (cx === 0) {
+                _e2 = stackAllLeft(h2.right, e2[1]);
+                _e1 = stackAllLeft(h1.right, e1[1]);
+                continue ;
               } else {
-                return c;
+                return cx;
               }
             } else {
-              return 0;
+              return c;
             }
           } else {
             return 0;
@@ -869,20 +848,15 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
         while(true) {
           var e2 = _e2;
           var e1 = _e1;
-          if (e1) {
-            if (e2) {
-              var h2 = e2[0];
-              var h1 = e1[0];
-              if (kcmp$1(h1.key, h2.key) === 0 && veq$1(h1.value, h2.value)) {
-                _e2 = stackAllLeft(h2.right, e2[1]);
-                _e1 = stackAllLeft(h1.right, e1[1]);
-                continue ;
-                
-              } else {
-                return /* false */0;
-              }
+          if (e1 && e2) {
+            var h2 = e2[0];
+            var h1 = e1[0];
+            if (kcmp$1(h1.key, h2.key) === 0 && veq$1(h1.value, h2.value)) {
+              _e2 = stackAllLeft(h2.right, e2[1]);
+              _e1 = stackAllLeft(h1.right, e1[1]);
+              continue ;
             } else {
-              return /* true */1;
+              return /* false */0;
             }
           } else {
             return /* true */1;
@@ -908,7 +882,6 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
           } else {
             _n = c < 0 ? n.left : n.right;
             continue ;
-            
           }
         } else {
           return /* None */0;
@@ -927,7 +900,6 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
           } else {
             _n = c < 0 ? n.left : n.right;
             continue ;
-            
           }
         } else {
           return undefined;
@@ -946,7 +918,6 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
           } else {
             _n = c < 0 ? n.left : n.right;
             continue ;
-            
           }
         } else {
           throw new Error("getExn0");
@@ -965,7 +936,6 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
           } else {
             _n = c < 0 ? n.left : n.right;
             continue ;
-            
           }
         } else {
           return def;
@@ -984,7 +954,6 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
           } else {
             _n = c < 0 ? n.left : n.right;
             continue ;
-            
           }
         } else {
           return /* false */0;
@@ -1099,7 +1068,7 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
       }
     }
     
-    function ofArray(xs, cmp) {
+    function fromArray(xs, cmp) {
       var len = xs.length;
       if (len === 0) {
         return null;
@@ -1109,10 +1078,10 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
               }));
         var result;
         if (next >= 0) {
-          result = ofSortedArrayAux(xs, 0, next);
+          result = fromSortedArrayAux(xs, 0, next);
         } else {
           next = -next | 0;
-          result = ofSortedArrayRevAux(xs, next - 1 | 0, next);
+          result = fromSortedArrayRevAux(xs, next - 1 | 0, next);
         }
         for(var i = next ,i_finish = len - 1 | 0; i <= i_finish; ++i){
           var match = xs[i];
@@ -1182,9 +1151,9 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
     exports.toArray = toArray;
     exports.keysToArray = keysToArray;
     exports.valuesToArray = valuesToArray;
-    exports.ofSortedArrayAux = ofSortedArrayAux;
-    exports.ofSortedArrayRevAux = ofSortedArrayRevAux;
-    exports.ofSortedArrayUnsafe = ofSortedArrayUnsafe;
+    exports.fromSortedArrayAux = fromSortedArrayAux;
+    exports.fromSortedArrayRevAux = fromSortedArrayRevAux;
+    exports.fromSortedArrayUnsafe = fromSortedArrayUnsafe;
     exports.cmpU = cmpU;
     exports.cmp = cmp;
     exports.eqU = eqU;
@@ -1194,7 +1163,7 @@ define(["exports", "./curry.js", "./belt_SortArray.js"],
     exports.getWithDefault = getWithDefault;
     exports.getExn = getExn;
     exports.has = has;
-    exports.ofArray = ofArray;
+    exports.fromArray = fromArray;
     exports.updateMutate = updateMutate;
     exports.balMutate = balMutate;
     exports.removeMinAuxWithRootMutate = removeMinAuxWithRootMutate;

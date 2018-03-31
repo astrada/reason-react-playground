@@ -13,8 +13,8 @@ external clear_ : unit => Js.Promise.t(unit) = "clear";
 let getItem = key => {
   let promise = getItem_(key);
   let vow = Vow.Result.wrap(promise, () => Js.log("Error: getItem " ++ key));
-  Vow.Result.map(
-    nullable => Vow.Result.return(Js.Nullable.to_opt(nullable)),
+  Vow.Result.flatMap(
+    nullable => Vow.Result.return(Js.Nullable.toOption(nullable)),
     vow
   );
 };

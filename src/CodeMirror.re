@@ -53,25 +53,25 @@ let make =
     ~reactClass,
     ~props={
       "autoFocus":
-        Js.Nullable.from_opt(
+        Js.Nullable.fromOption(
           Utils.optionMap(Js.Boolean.to_js_boolean, autoFocus)
         ),
       "autoSave":
-        Js.Nullable.from_opt(
+        Js.Nullable.fromOption(
           Utils.optionMap(Js.Boolean.to_js_boolean, autoSave)
         ),
-      "className": Js.Nullable.from_opt(className),
-      "defaultValue": Js.Nullable.from_opt(defaultValue),
-      "options": Js.Nullable.from_opt(options),
-      "onChange": Js.Nullable.from_opt(onChange),
-      "onCursorActivity": Js.Nullable.from_opt(onCursorActivity),
-      "onFocusChange": Js.Nullable.from_opt(onFocusChange),
-      "onScroll": Js.Nullable.from_opt(onScroll),
+      "className": Js.Nullable.fromOption(className),
+      "defaultValue": Js.Nullable.fromOption(defaultValue),
+      "options": Js.Nullable.fromOption(options),
+      "onChange": Js.Nullable.fromOption(onChange),
+      "onCursorActivity": Js.Nullable.fromOption(onCursorActivity),
+      "onFocusChange": Js.Nullable.fromOption(onFocusChange),
+      "onScroll": Js.Nullable.fromOption(onScroll),
       "preservePositionScroll":
-        Js.Nullable.from_opt(
+        Js.Nullable.fromOption(
           Utils.optionMap(Js.Boolean.to_js_boolean, preservePositionScroll)
         ),
-      "value": Js.Nullable.from_opt(value)
+      "value": Js.Nullable.fromOption(value)
     },
     children
   );

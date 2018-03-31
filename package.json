@@ -16,8 +16,7 @@
     "react-dom": "^16.1.1",
     "react-toolbox": "^2.0.0-beta.12",
     "reason": "^3.0.2",
-    "reason-scripts": "^0.8.0",
-    "vow": "https://github.com/wokalski/vow.git"
+    "reason-scripts": "^0.8.0"
   },
   "scripts": {
     "start": "react-scripts start",

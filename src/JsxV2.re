@@ -14,8 +14,6 @@ type compilerResult = {
 
 [@bs.val] external jsxv2 : jsxv2 = "";
 
-[@bs.send] external rewrite : (jsxv2, string) => string = "";
+[@bs.send] external rewrite : (jsxv2, string) => compilerResult = "";
 
-[@bs.val] [@bs.scope "JSON"] external parse : string => compilerResult = "";
-
-let rewrite = code => parse(rewrite(jsxv2, code));
+let rewrite = code => rewrite(jsxv2, code);

@@ -46,7 +46,7 @@ external replaceState :
   "replaceState";
 
 let getCodeFromQueryString = () => {
-  let search = Js.Nullable.to_opt(getLocationSearch(location));
+  let search = Js.Nullable.toOption(getLocationSearch(location));
   switch (search) {
   | None => Null
   | Some(s) =>
@@ -86,7 +86,7 @@ let setQueryStringFromCode = code => {
 
 let getCodeFromStorage = () => {
   let jsDataVow = LocalForage.getItem(defaultStorageKey);
-  Vow.Result.map(jsData => Vow.Result.return(jsData2code(jsData)), jsDataVow);
+  Vow.Result.flatMap(jsData => Vow.Result.return(jsData2code(jsData)), jsDataVow);
 };
 
 let saveCodeToStorage = code => {

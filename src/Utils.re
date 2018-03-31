@@ -32,8 +32,8 @@ let refmtML2RE = code => {
 
 let jsxv2Rewrite = code => {
   let result = JsxV2.rewrite(code);
-  let outputCode = Js.Nullable.to_opt(result##ocaml_code);
-  let errorMessage = Js.Nullable.to_opt(result##ppx_error_msg);
+  let outputCode = Js.Nullable.toOption(result##ocaml_code);
+  let errorMessage = Js.Nullable.toOption(result##ppx_error_msg);
   switch (outputCode) {
   | Some("")
   | None => ErrorMessage(Js.Option.getWithDefault("", errorMessage))
@@ -43,8 +43,8 @@ let jsxv2Rewrite = code => {
 
 let compileOCaml = code => {
   let (result, warnings) = BucklescriptCompiler.compile(code);
-  let outputCode = Js.Nullable.to_opt(result##js_code);
-  let errorMessage = Js.Nullable.to_opt(result##js_error_msg);
+  let outputCode = Js.Nullable.toOption(result##js_code);
+  let errorMessage = Js.Nullable.toOption(result##js_error_msg);
   switch (outputCode) {
   | Some("")
   | None => ErrorMessage(Js.Option.getWithDefault("", errorMessage))
@@ -66,7 +66,7 @@ type evalResult =
 
 let evalJs = code => {
   let result = EvalJs.evalJs(code);
-  let errorMessage = Js.Nullable.to_opt(result##errorMessage);
+  let errorMessage = Js.Nullable.toOption(result##errorMessage);
   switch (errorMessage) {
   | None => Success
   | Some(em) => ErrorMessage(em)

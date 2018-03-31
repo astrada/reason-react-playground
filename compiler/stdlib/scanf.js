@@ -1,6 +1,6 @@
 'use strict';
 define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buffer.js", "./js_exn.js", "./printf.js", "./string.js", "./caml_bytes.js", "./caml_int32.js", "./pervasives.js", "./caml_format.js", "./caml_string.js", "./caml_exceptions.js", "./camlinternalFormat.js", "./caml_missing_polyfill.js", "./caml_builtin_exceptions.js", "./camlinternalFormatBasics.js"],
-  function(exports, List, Block, Bytes, Curry, Buffer, Js_exn, Printf, $$String, Caml_bytes, Caml_int32, Pervasives, Caml_format, Caml_string, Caml_exceptions, CamlinternalFormat, Caml_missing_polyfill, Caml_builtin_exceptions, CamlinternalFormatBasics){
+  function(exports, List, Block, Bytes, Curry, $$Buffer, Js_exn, Printf, $$String, Caml_bytes, Caml_int32, Pervasives, Caml_format, Caml_string, Caml_exceptions, CamlinternalFormat, Caml_missing_polyfill, Caml_builtin_exceptions, CamlinternalFormatBasics){
     'use strict';
     function next_char(ib) {
       try {
@@ -75,7 +75,7 @@ define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buf
     
     function token(ib) {
       var tokbuf = ib[/* tokbuf */7];
-      var tok = Buffer.contents(tokbuf);
+      var tok = $$Buffer.contents(tokbuf);
       tokbuf[/* position */1] = 0;
       ib[/* token_count */5] = ib[/* token_count */5] + 1 | 0;
       return tok;
@@ -88,7 +88,7 @@ define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buf
     }
     
     function store_char(width, ib, c) {
-      Buffer.add_char(ib[/* tokbuf */7], c);
+      $$Buffer.add_char(ib[/* tokbuf */7], c);
       return ignore_char(width, ib);
     }
     
@@ -101,7 +101,7 @@ define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buf
               /* line_count */0,
               /* token_count */0,
               /* get_next_char */next,
-              /* tokbuf */Buffer.create(1024),
+              /* tokbuf */$$Buffer.create(1024),
               /* input_name */iname
             ];
     }
@@ -294,14 +294,12 @@ define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buf
                 } else {
                   ib$1[/* current_char_is_valid */2] = /* false */0;
                   continue ;
-                  
                 }
               } else if (switcher === 3 || switcher === 2) {
                 return /* () */0;
               } else {
                 ib$1[/* current_char_is_valid */2] = /* false */0;
                 continue ;
-                
               }
             }
           };
@@ -320,7 +318,6 @@ define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buf
             ib[/* current_char_is_valid */2] = /* false */0;
             _c = /* "\n" */10;
             continue ;
-            
           } else {
             var s$1 = character_mismatch_err(c, ci);
             throw [
@@ -453,13 +450,11 @@ define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buf
               var width$1 = ignore_char(width, ib);
               _width = width$1;
               continue ;
-              
             }
           } else if (c >= 48) {
             var width$2 = store_char(width, ib, c);
             _width = width$2;
             continue ;
-            
           } else {
             return width;
           }
@@ -512,13 +507,11 @@ define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buf
               } else if (Curry._1(digitp, c$1)) {
                 _width = store_char(width$1, ib, c$1);
                 continue ;
-                
               } else if (c$1 !== 95) {
                 return width$1;
               } else {
                 _width = ignore_char(width$1, ib);
                 continue ;
-                
               }
             }
           };
@@ -823,7 +816,6 @@ define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buf
             } else {
               _width = store_char(width$1, ib, c);
               continue ;
-              
             }
           } else {
             var switcher = c - 9 | 0;
@@ -831,14 +823,12 @@ define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buf
               if (switcher !== 23) {
                 _width = store_char(width$1, ib, c);
                 continue ;
-                
               } else {
                 return width$1;
               }
             } else if (switcher === 3 || switcher === 2) {
               _width = store_char(width$1, ib, c);
               continue ;
-              
             } else {
               return width$1;
             }
@@ -1034,12 +1024,8 @@ define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buf
         } else {
           return bad_input_escape(c);
         }
-      } else if (c !== 34) {
-        if (c >= 39) {
-          exit = 1;
-        } else {
-          return bad_input_escape(c);
-        }
+      } else if (c !== 34 && c < 39) {
+        return bad_input_escape(c);
       } else {
         exit = 1;
       }
@@ -1090,7 +1076,6 @@ define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buf
             if (c !== 92) {
               _width = store_char(width, ib, c);
               continue ;
-              
             } else {
               var width$1 = ignore_char(width, ib);
               var match = check_next_char("a String", width$1, ib);
@@ -1124,7 +1109,6 @@ define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buf
           } else {
             _width = ignore_char(width, ib);
             continue ;
-            
           }
         };
       };
@@ -1178,7 +1162,6 @@ define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buf
             store_char(Pervasives.max_int, ib, c);
             _i = i - 1 | 0;
             continue ;
-            
           } else {
             return 0;
           }
@@ -1298,12 +1281,12 @@ define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buf
             case 8 : 
                 _fmt = fmt[3];
                 continue ;
-                case 14 : 
+            case 14 : 
                 return take_fmtty_format_readers(k, CamlinternalFormatBasics.erase_rel(CamlinternalFormat.symm(fmt[1])), fmt[2]);
             case 18 : 
                 _fmt = CamlinternalFormatBasics.concat_fmt(fmt[0][0][0], fmt[1]);
                 continue ;
-                case 19 : 
+            case 19 : 
                 var fmt_rest = fmt[0];
                 return (function(fmt_rest){
                 return function (reader) {
@@ -1324,7 +1307,7 @@ define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buf
             case 21 : 
                 _fmt = fmt[1];
                 continue ;
-                case 23 : 
+            case 23 : 
                 var k$1 = k;
                 var ign = fmt[0];
                 var fmt$1 = fmt[1];
@@ -1354,10 +1337,9 @@ define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buf
             case 24 : 
                 _fmt = fmt[2];
                 continue ;
-                default:
+            default:
               _fmt = fmt[0];
               continue ;
-              
           }
         }
       };
@@ -1373,11 +1355,11 @@ define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buf
             case 8 : 
                 _fmtty = fmtty[1];
                 continue ;
-                case 9 : 
+            case 9 : 
                 var ty = CamlinternalFormat.trans(CamlinternalFormat.symm(fmtty[0]), fmtty[1]);
                 _fmtty = CamlinternalFormatBasics.concat_fmtty(ty, fmtty[2]);
                 continue ;
-                case 13 : 
+            case 13 : 
                 var fmt_rest = fmtty[0];
                 return (function(fmt_rest){
                 return function (reader) {
@@ -1406,7 +1388,6 @@ define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buf
             default:
               _fmtty = fmtty[0];
               continue ;
-              
           }
         }
       };
@@ -1469,7 +1450,6 @@ define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buf
                           };
                           return pad_prec_scanf(ib, CamlinternalFormatBasics.concat_fmt(match$1[0][0], rest[1]), readers, pad, /* No_precision */0, scan$2, token);
                         }
-                        break;
                     default:
                       exit = 1;
                   }
@@ -1551,14 +1531,12 @@ define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buf
                 if (end_of_input(ib)) {
                   _fmt = fmt[0];
                   continue ;
-                  
                 } else {
                   throw [
                         Scan_failure,
                         "end of input not found"
                       ];
                 }
-                break;
             case 11 : 
                 var f = function (param) {
                   return check_char(ib, param);
@@ -1566,11 +1544,11 @@ define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buf
                 Bytes.iter(f, Caml_string.bytes_of_string(fmt[0]));
                 _fmt = fmt[1];
                 continue ;
-                case 12 : 
+            case 12 : 
                 check_char(ib, fmt[0]);
                 _fmt = fmt[1];
                 continue ;
-                case 13 : 
+            case 13 : 
                 scan_caml_string(width_of_pad_opt(fmt[0]), ib);
                 var s = token(ib);
                 var fmt$1;
@@ -1641,21 +1619,18 @@ define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buf
                 Bytes.iter(f$1, Caml_string.bytes_of_string(s$2));
                 _fmt = fmt[1];
                 continue ;
-                case 18 : 
+            case 18 : 
                 var match$5 = fmt[0];
                 check_char(ib, /* "@" */64);
                 if (match$5.tag) {
                   check_char(ib, /* "[" */91);
                   _fmt = CamlinternalFormatBasics.concat_fmt(match$5[0][0], fmt[1]);
                   continue ;
-                  
                 } else {
                   check_char(ib, /* "{" */123);
                   _fmt = CamlinternalFormatBasics.concat_fmt(match$5[0][0], fmt[1]);
                   continue ;
-                  
                 }
-                break;
             case 19 : 
                 var x = Curry._1(readers[0], ib);
                 return /* Cons */[
@@ -1667,9 +1642,9 @@ define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buf
                 var char_set = fmt[1];
                 var width_opt = fmt[0];
                 var exit$1 = 0;
-                if (typeof rest$1 === "number") {
+                if (typeof rest$1 === "number" || rest$1.tag !== 17) {
                   exit$1 = 1;
-                } else if (rest$1.tag === 17) {
+                } else {
                   var match$6 = stopper_of_formatting_lit(rest$1[0]);
                   var width = width_of_pad_opt(width_opt);
                   scan_chars_in_char_set(char_set, /* Some */[match$6[0]], width, ib);
@@ -1684,8 +1659,6 @@ define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buf
                           s$3,
                           make_scanf(ib, str_rest$1, readers)
                         ];
-                } else {
-                  exit$1 = 1;
                 }
                 if (exit$1 === 1) {
                   var width$1 = width_of_pad_opt(width_opt);
@@ -1724,7 +1697,6 @@ define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buf
                         ]
                       ];
                 }
-                break;
             case 24 : 
                 throw [
                       Caml_builtin_exceptions.invalid_argument,
@@ -1801,7 +1773,7 @@ define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buf
       var str = param[1];
       var fmt = param[0];
       var k = function (readers, f) {
-        Buffer.reset(ib[/* tokbuf */7]);
+        $$Buffer.reset(ib[/* tokbuf */7]);
         var match;
         try {
           match = /* Args */Block.__(0, [make_scanf(ib, fmt, readers)]);
@@ -1836,7 +1808,6 @@ define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buf
               _args = args[1];
               _f = Curry._1(f$1, args[0]);
               continue ;
-              
             } else {
               return f$1;
             }
@@ -1897,17 +1868,17 @@ define(["exports", "./list.js", "./block.js", "./bytes.js", "./curry.js", "./buf
     
     function string_to_String(s) {
       var l = s.length;
-      var b = Buffer.create(l + 2 | 0);
-      Buffer.add_char(b, /* "\"" */34);
+      var b = $$Buffer.create(l + 2 | 0);
+      $$Buffer.add_char(b, /* "\"" */34);
       for(var i = 0 ,i_finish = l - 1 | 0; i <= i_finish; ++i){
         var c = Caml_string.get(s, i);
         if (c === /* "\"" */34) {
-          Buffer.add_char(b, /* "\\" */92);
+          $$Buffer.add_char(b, /* "\\" */92);
         }
-        Buffer.add_char(b, c);
+        $$Buffer.add_char(b, c);
       }
-      Buffer.add_char(b, /* "\"" */34);
-      return Buffer.contents(b);
+      $$Buffer.add_char(b, /* "\"" */34);
+      return $$Buffer.contents(b);
     }
     
     function format_from_string(s, fmt) {

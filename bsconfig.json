@@ -6,7 +6,7 @@
   "bs-dependencies": [
     "reason-react",
     "@astrada/reason-react-toolbox",
-    "vow"
+    "@wokalski/vow"
   ],
   "bs-dev-dependencies": [
     "@glennsl/bs-jest"
