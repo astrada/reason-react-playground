@@ -87,7 +87,7 @@ define(["exports", "./curry.js", "./belt_SortArray.js", "./belt_internalAVLset.j
       var k = nt.value;
       var c = cmp(x, k);
       if (c === 0) {
-        removed[0] = /* true */1;
+        removed[0] = true;
         var l = nt.left;
         var r = nt.right;
         if (l !== null) {
@@ -122,14 +122,14 @@ define(["exports", "./curry.js", "./belt_SortArray.js", "./belt_internalAVLset.j
     function removeCheck(d, v) {
       var oldRoot = d.data;
       if (oldRoot !== null) {
-        var removed = [/* false */0];
+        var removed = [false];
         var newRoot = removeCheck0(oldRoot, v, removed, d.cmp);
         if (newRoot !== oldRoot) {
           d.data = newRoot;
         }
         return removed[0];
       } else {
-        return /* false */0;
+        return false;
       }
     }
     
@@ -151,14 +151,14 @@ define(["exports", "./curry.js", "./belt_SortArray.js", "./belt_internalAVLset.j
           return Belt_internalAVLset.balMutate(t);
         }
       } else {
-        added[0] = /* true */1;
+        added[0] = true;
         return Belt_internalAVLset.singleton(x);
       }
     }
     
     function addCheck(m, e) {
       var oldRoot = m.data;
-      var added = [/* false */0];
+      var added = [false];
       var newRoot = addCheck0(oldRoot, e, added, m.cmp);
       if (newRoot !== oldRoot) {
         m.data = newRoot;
@@ -318,7 +318,7 @@ define(["exports", "./curry.js", "./belt_SortArray.js", "./belt_internalAVLset.j
                     data: Belt_internalAVLset.fromSortedArrayAux(arr, next, len - next | 0)
                   }
                 ],
-                /* false */0
+                false
               ];
       } else {
         return /* tuple */[
@@ -332,7 +332,7 @@ define(["exports", "./curry.js", "./belt_SortArray.js", "./belt_internalAVLset.j
                     data: Belt_internalAVLset.fromSortedArrayAux(arr, i + 1 | 0, (len - i | 0) - 1 | 0)
                   }
                 ],
-                /* true */1
+                true
               ];
       }
     }

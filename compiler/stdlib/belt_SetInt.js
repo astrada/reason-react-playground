@@ -129,7 +129,7 @@ define(["exports", "./belt_internalAVLset.js", "./belt_internalSetInt.js"],
       var v = n.value;
       var r = n.right;
       if (x === v) {
-        pres[0] = /* true */1;
+        pres[0] = true;
         return /* tuple */[
                 l,
                 r
@@ -163,7 +163,7 @@ define(["exports", "./belt_internalAVLset.js", "./belt_internalSetInt.js"],
     
     function split(t, x) {
       if (t !== null) {
-        var pres = [/* false */0];
+        var pres = [false];
         var v = splitAuxPivot(t, x, pres);
         return /* tuple */[
                 v,
@@ -175,7 +175,7 @@ define(["exports", "./belt_internalAVLset.js", "./belt_internalSetInt.js"],
                   Belt_internalAVLset.empty,
                   Belt_internalAVLset.empty
                 ],
-                /* false */0
+                false
               ];
       }
     }
@@ -217,7 +217,7 @@ define(["exports", "./belt_internalAVLset.js", "./belt_internalSetInt.js"],
         var l1 = s1.left;
         var v1 = s1.value;
         var r1 = s1.right;
-        var pres = [/* false */0];
+        var pres = [false];
         var match = splitAuxPivot(s2, v1, pres);
         var ll = intersect(l1, match[0]);
         var rr = intersect(r1, match[1]);
@@ -236,7 +236,7 @@ define(["exports", "./belt_internalAVLset.js", "./belt_internalSetInt.js"],
         var l1 = s1.left;
         var v1 = s1.value;
         var r1 = s1.right;
-        var pres = [/* false */0];
+        var pres = [false];
         var match = splitAuxPivot(s2, v1, pres);
         var ll = diff(l1, match[0]);
         var rr = diff(r1, match[1]);

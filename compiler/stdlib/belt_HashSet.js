@@ -144,19 +144,19 @@ define(["exports", "./belt_internalSetBuckets.js", "./belt_internalBucketsType.j
         while(true) {
           var cell = _cell;
           if (eq$1(cell.key, key$1)) {
-            return /* true */1;
+            return true;
           } else {
             var match = cell.next;
             if (match !== undefined) {
               _cell = match;
               continue ;
             } else {
-              return /* false */0;
+              return false;
             }
           }
         };
       } else {
-        return /* false */0;
+        return false;
       }
     }
     

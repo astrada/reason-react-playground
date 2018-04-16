@@ -6,6 +6,10 @@ define(["exports"],
     
     var Internal = 0;
     
+    var true_ = true;
+    
+    var false_ = false;
+    
     var Null = 0;
     
     var Undefined = 0;
@@ -58,6 +62,8 @@ define(["exports"],
     
     exports.MapperRt = MapperRt;
     exports.Internal = Internal;
+    exports.true_ = true_;
+    exports.false_ = false_;
     exports.Null = Null;
     exports.Undefined = Undefined;
     exports.Nullable = Nullable;

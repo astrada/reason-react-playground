@@ -136,19 +136,19 @@ define(["exports", "./caml_hash.js", "./belt_internalSetBuckets.js", "./belt_int
         while(true) {
           var cell = _cell;
           if (cell.key === key$1) {
-            return /* true */1;
+            return true;
           } else {
             var match = cell.next;
             if (match !== undefined) {
               _cell = match;
               continue ;
             } else {
-              return /* false */0;
+              return false;
             }
           }
         };
       } else {
-        return /* false */0;
+        return false;
       }
     }
     

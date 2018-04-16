@@ -49,7 +49,7 @@ let defaultReasonCode = {j|module Greeting = {
   let component = ReasonReact.statelessComponent("Greeting");
   let make = (_children) => {
     ...component,
-    render: (self) => <button> (ReasonReact.stringToElement("Hello!")) </button>
+    render: (_self) => <button> (ReasonReact.stringToElement("Hello!")) </button>
   };
 };
 

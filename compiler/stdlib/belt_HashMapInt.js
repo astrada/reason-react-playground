@@ -28,14 +28,14 @@ define(["exports", "./caml_hash.js", "./belt_internalBuckets.js", "./belt_intern
         var cell = _cell;
         if (cell.key === key) {
           cell.value = info;
-          return /* false */0;
+          return false;
         } else {
           var match = cell.next;
           if (match !== undefined) {
             _cell = match;
             continue ;
           } else {
-            return /* true */1;
+            return true;
           }
         }
       };
@@ -187,19 +187,19 @@ define(["exports", "./caml_hash.js", "./belt_internalBuckets.js", "./belt_intern
         while(true) {
           var cell = _cell;
           if (cell.key === key$1) {
-            return /* true */1;
+            return true;
           } else {
             var match = cell.next;
             if (match !== undefined) {
               _cell = match;
               continue ;
             } else {
-              return /* false */0;
+              return false;
             }
           }
         };
       } else {
-        return /* false */0;
+        return false;
       }
     }
     

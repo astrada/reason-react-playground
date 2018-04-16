@@ -64,14 +64,14 @@ define(["exports", "./list.js", "./bytes.js", "./caml_int32.js", "./caml_string.
       var switcher = param - 9 | 0;
       if (switcher > 4 || switcher < 0) {
         if (switcher !== 23) {
-          return /* false */0;
+          return false;
         } else {
-          return /* true */1;
+          return true;
         }
       } else if (switcher !== 2) {
-        return /* true */1;
+        return true;
       } else {
-        return /* false */0;
+        return false;
       }
     }
     
@@ -88,26 +88,26 @@ define(["exports", "./list.js", "./bytes.js", "./caml_int32.js", "./caml_string.
         while(true) {
           var i = _i;
           if (i >= s.length) {
-            return /* false */0;
+            return false;
           } else {
             var match = s.charCodeAt(i);
             if (match >= 32) {
               var switcher = match - 34 | 0;
               if (switcher > 58 || switcher < 0) {
                 if (switcher >= 93) {
-                  return /* true */1;
+                  return true;
                 } else {
                   _i = i + 1 | 0;
                   continue ;
                 }
               } else if (switcher > 57 || switcher < 1) {
-                return /* true */1;
+                return true;
               } else {
                 _i = i + 1 | 0;
                 continue ;
               }
             } else {
-              return /* true */1;
+              return true;
             }
           }
         };

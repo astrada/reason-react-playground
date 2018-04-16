@@ -31,14 +31,14 @@ define(["exports", "./belt_internalBuckets.js", "./belt_internalBucketsType.js"]
         var cell = _cell;
         if (eq(cell.key, key)) {
           cell.value = info;
-          return /* false */0;
+          return false;
         } else {
           var match = cell.next;
           if (match !== undefined) {
             _cell = match;
             continue ;
           } else {
-            return /* true */1;
+            return true;
           }
         }
       };
@@ -200,19 +200,19 @@ define(["exports", "./belt_internalBuckets.js", "./belt_internalBucketsType.js"]
         while(true) {
           var cell = _cell;
           if (eq(cell.key, key$1)) {
-            return /* true */1;
+            return true;
           } else {
             var match = cell.next;
             if (match !== undefined) {
               _cell = match;
               continue ;
             } else {
-              return /* false */0;
+              return false;
             }
           }
         };
       } else {
-        return /* false */0;
+        return false;
       }
     }
     

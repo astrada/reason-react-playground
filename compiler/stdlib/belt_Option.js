@@ -56,17 +56,17 @@ define(["exports", "./curry.js"],
     
     function isSome(param) {
       if (param) {
-        return /* true */1;
+        return true;
       } else {
-        return /* false */0;
+        return false;
       }
     }
     
     function isNone(param) {
       if (param) {
-        return /* false */0;
+        return false;
       } else {
-        return /* true */1;
+        return true;
       }
     }
     
@@ -75,12 +75,12 @@ define(["exports", "./curry.js"],
         if (b) {
           return f(a[0], b[0]);
         } else {
-          return /* false */0;
+          return false;
         }
       } else if (b) {
-        return /* false */0;
+        return false;
       } else {
-        return /* true */1;
+        return true;
       }
     }
     
