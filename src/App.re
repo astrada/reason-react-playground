@@ -161,14 +161,14 @@ let make = _children => {
     if (self.state.loading) {
       Vow.Result.sideEffect(
         fun
-        | `Fail () => ()
-        | `Success(
+        | Error() => ()
+        | Ok((
             reasonCode,
             refmtResult,
             jsxv2Result,
             ocamlResult,
             persisterCode
-          ) =>
+          )) =>
           switch (persisterCode) {
           | Persister.Null => ()
           | Persister.Reason(_) =>

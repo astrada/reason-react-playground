@@ -23,13 +23,13 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "prepare": "npm link bs-platform",
     "clean": "bsb -clean-world",
     "toolbox": "react-toolbox-themr"
   },
   "devDependencies": {
-    "@astrada/reason-react-toolbox": "^0.4.2",
+    "@astrada/reason-react-toolbox": "^0.5.0",
     "@glennsl/bs-jest": "^0.3.2",
+    "bs-platform": "^3.0.0",
     "browserify": "^14.4.0",
     "deamdify": "^0.3.0",
     "react-toolbox-themr": "^1.0.2",

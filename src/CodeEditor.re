@@ -62,12 +62,12 @@ let make =
     ) => {
   ...component,
   render: _self => {
-    let options = {"lineNumbers": Js.Boolean.to_js_boolean(true)};
+    let options = {"lineNumbers": true};
     let options = Js.Obj.assign(options, {"mode": mode});
     let options =
       switch (readOnly) {
       | Some(ro) =>
-        Js.Obj.assign(options, {"readOnly": Js.Boolean.to_js_boolean(ro)})
+        Js.Obj.assign(options, {"readOnly": ro})
       | None => options
       };
     let loadingMask =
