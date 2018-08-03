@@ -49,7 +49,7 @@ let defaultReasonCode = {j|module Greeting = {
   let component = ReasonReact.statelessComponent("Greeting");
   let make = (_children) => {
     ...component,
-    render: (_self) => <button> (ReasonReact.stringToElement("Hello!")) </button>
+    render: (_self) => <button> (ReasonReact.string("Hello!")) </button>
   };
 };
 
@@ -187,8 +187,7 @@ let make = _children => {
           },
         initialVow
       );
-    };
-    ReasonReact.NoUpdate;
+    }
   },
   reducer: (action, state) => {
     let updateAll =
@@ -346,7 +345,7 @@ let make = _children => {
           readOnly
         />;
       } else {
-        ReasonReact.nullElement;
+        ReasonReact.null;
       };
     let jsxv2CodeEditor =
       buildCodeEditor(
@@ -366,7 +365,7 @@ let make = _children => {
           readOnly=true
         />;
       } else {
-        ReasonReact.nullElement;
+        ReasonReact.null;
       };
     <ReactToolbox.ThemeProvider theme>
       <div>
@@ -388,11 +387,11 @@ let make = _children => {
           )>
           <ReactToolbox.IconMenu
             className="white-icon"
-            icon=(ReasonReact.stringToElement("more_vert"))
+            icon=(ReasonReact.string("more_vert"))
             position=ReactToolbox.IconMenu.Position.TopRight
             menuRipple=true>
             <ReactToolbox.MenuItem
-              icon=(ReasonReact.stringToElement("delete"))
+              icon=(ReasonReact.string("delete"))
               caption="Reset"
               onClick=(_event => self.send(Reset))
             />
@@ -409,19 +408,19 @@ let make = _children => {
           />
           <ReactToolbox.Checkbox
             checked=self.state.jsxv2.show
-            label=(ReasonReact.stringToElement("Show OCaml+JSX"))
+            label=(ReasonReact.string("Show OCaml+JSX"))
             onChange=((_checked, _event) => self.send(ToggleJsxV2))
           />
           jsxv2CodeEditor
           <ReactToolbox.Checkbox
             checked=self.state.ocaml.show
-            label=(ReasonReact.stringToElement("Show OCaml (read-only)"))
+            label=(ReasonReact.string("Show OCaml (read-only)"))
             onChange=((_checked, _event) => self.send(ToggleOCaml))
           />
           ocamlCodeEditor
           <ReactToolbox.Checkbox
             checked=self.state.showJs
-            label=(ReasonReact.stringToElement("Show JS (read-only)"))
+            label=(ReasonReact.string("Show JS (read-only)"))
             onChange=((_checked, _event) => self.send(ToggleJs))
           />
           jsCodeEditor

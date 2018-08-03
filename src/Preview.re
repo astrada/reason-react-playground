@@ -55,8 +55,7 @@ let make = (~code, ~className=?, ~onDone: option(bool => unit)=?, _children) => 
       )
     },
   didMount: self => {
-    executeCode(self);
-    ReasonReact.NoUpdate;
+    executeCode(self)
   },
   didUpdate: ({oldSelf, newSelf}) =>
     if (oldSelf.retainedProps.code !== newSelf.retainedProps.code) {

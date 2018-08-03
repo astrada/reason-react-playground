@@ -42,9 +42,9 @@ let make =
       ~defaultValue: option(string)=?,
       ~options: option(Js.t({..}))=?,
       ~onChange: option((string, change) => unit)=?,
-      ~onCursorActivity: option(ReasonReact.Callback.t(Js.t({..})))=?,
-      ~onFocusChange: option(ReasonReact.Callback.t(bool))=?,
-      ~onScroll: option(ReasonReact.Callback.t(scrollInfo))=?,
+      ~onCursorActivity: option(Js.t({..}) => unit)=?,
+      ~onFocusChange: option(bool => unit)=?,
+      ~onScroll: option(scrollInfo => unit)=?,
       ~preservePositionScroll: option(bool)=?,
       ~value: option(string)=?,
       children

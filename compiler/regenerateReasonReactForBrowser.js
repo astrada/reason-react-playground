@@ -27,7 +27,7 @@ try {
 };
 reasonReactDirFiles.forEach(file => {
   //const exposedRequireName = path.join('reason-react', 'lib', 'js', 'src', path.basename(file, '.js'));
-  const exposedRequireName = path.join('stdlib', uncapitalize(path.basename(file, '.js')));
+  const exposedRequireName = './' + path.join('stdlib', uncapitalize(path.basename(file)));
   b.require(path.join(reasonReactDir, file), {expose: exposedRequireName});
 });
 

@@ -23,9 +23,9 @@ let make:
     ~defaultValue: string=?,
     ~options: Js.t({..})=?,
     ~onChange: (string, change) => unit=?,
-    ~onCursorActivity: ReasonReact.Callback.t(Js.t({..}))=?,
-    ~onFocusChange: ReasonReact.Callback.t(bool)=?,
-    ~onScroll: ReasonReact.Callback.t(scrollInfo)=?,
+    ~onCursorActivity: (Js.t({..}) => unit)=?,
+    ~onFocusChange: (bool => unit)=?,
+    ~onScroll: (scrollInfo => unit)=?,
     ~preservePositionScroll: bool=?,
     ~value: string=?,
     array(ReasonReact.reactElement)

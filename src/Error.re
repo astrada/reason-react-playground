@@ -10,10 +10,10 @@ let make = (~errorMessage=?, _children) => {
   ...component,
   render: _self =>
     switch (errorMessage) {
-    | None => ReasonReact.nullElement
+    | None => ReasonReact.null
     | Some(e) =>
       <div style=errorStyle>
-        <div style=errorBodyStyle> (ReasonReact.stringToElement(e)) </div>
+        <div style=errorBodyStyle> (ReasonReact.string(e)) </div>
       </div>
     }
 };

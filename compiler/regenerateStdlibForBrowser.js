@@ -21,13 +21,11 @@ try {
 };
 
 stdlibDirFiles.forEach(file => {
-  const exposedRequireName = path.join('stdlib', path.basename(file, '.js'));
-  // map `require('stdlib/list')` from the playground to `require('./stdlib/list.js')`
+  const exposedRequireName = './' + path.join('stdlib', path.basename(file));
   b.require(path.join(stdlibDir, file), {expose: exposedRequireName});
 });
 
 b
-  .transform('deamdify')
   .transform('uglifyify', { global: true })
   .require(path.join(__dirname, 'dummy.js'), {expose: 'fs'})
   .bundle()

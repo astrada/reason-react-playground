@@ -73,14 +73,14 @@ let make =
     let loadingMask =
       if (loading) {
         <div style=loadingMaskStyle>
-          (ReasonReact.stringToElement("Loading..."))
+          (ReasonReact.string("Loading..."))
         </div>;
       } else {
-        ReasonReact.nullElement;
+        ReasonReact.null;
       };
     <div style=rowStyle>
       loadingMask
-      <div style=labelStyle> (ReasonReact.stringToElement(label)) </div>
+      <div style=labelStyle> (ReasonReact.string(label)) </div>
       <CodeMirror value=?code ?onChange options preservePositionScroll=true />
       <Error errorMessage=?error />
       <Warnings ?warnings />

@@ -10,10 +10,10 @@ let make = (~warnings=?, _children) => {
   ...component,
   render: _self =>
     switch (warnings) {
-    | None => ReasonReact.nullElement
+    | None => ReasonReact.null
     | Some(w) =>
       <div style=warningStyle>
-        <div style=errorBodyStyle> (ReasonReact.stringToElement(w)) </div>
+        <div style=errorBodyStyle> (ReasonReact.string(w)) </div>
       </div>
     }
 };

@@ -15,7 +15,7 @@
     "react": "^16.1.1",
     "react-dom": "^16.1.1",
     "react-toolbox": "^2.0.0-beta.12",
-    "reason": "^3.0.2",
+    "reason": "^3.1.0",
     "reason-scripts": "^0.8.0"
   },
   "scripts": {
@@ -27,13 +27,13 @@
     "toolbox": "react-toolbox-themr"
   },
   "devDependencies": {
-    "@astrada/reason-react-toolbox": "^0.5.0",
-    "@glennsl/bs-jest": "^0.3.2",
-    "bs-platform": "^3.0.0",
+    "@astrada/reason-react-toolbox": "^0.6.0",
+    "@glennsl/bs-jest": "^0.4.2",
     "browserify": "^14.4.0",
+    "bs-platform": "^4.0.3",
     "deamdify": "^0.3.0",
     "react-toolbox-themr": "^1.0.2",
-    "reason-react": "^0.3.1",
+    "reason-react": "^0.4.2",
     "uglifyify": "^4.0.4"
   }
 }

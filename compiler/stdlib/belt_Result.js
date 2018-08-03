@@ -1,21 +1,21 @@
 'use strict';
 
+var Block = require("./block.js");
 var Curry = require("./curry.js");
-var Js_primitive = require("./js_primitive.js");
 
 function getExn(param) {
-  if (param !== undefined) {
-    return Js_primitive.valFromOption(param);
-  } else {
+  if (param.tag) {
     throw new Error("getExn");
+  } else {
+    return param[0];
   }
 }
 
 function mapWithDefaultU(opt, $$default, f) {
-  if (opt !== undefined) {
-    return f(Js_primitive.valFromOption(opt));
-  } else {
+  if (opt.tag) {
     return $$default;
+  } else {
+    return f(opt[0]);
   }
 }
 
@@ -24,10 +24,11 @@ function mapWithDefault(opt, $$default, f) {
 }
 
 function mapU(opt, f) {
-  if (opt !== undefined) {
-    return Js_primitive.some(f(Js_primitive.valFromOption(opt)));
+  if (opt.tag) {
+    return /* Error */Block.__(1, [opt[0]]);
+  } else {
+    return /* Ok */Block.__(0, [f(opt[0])]);
   }
-  
 }
 
 function map(opt, f) {
@@ -35,10 +36,11 @@ function map(opt, f) {
 }
 
 function flatMapU(opt, f) {
-  if (opt !== undefined) {
-    return f(Js_primitive.valFromOption(opt));
+  if (opt.tag) {
+    return /* Error */Block.__(1, [opt[0]]);
+  } else {
+    return f(opt[0]);
   }
-  
 }
 
 function flatMap(opt, f) {
@@ -46,30 +48,40 @@ function flatMap(opt, f) {
 }
 
 function getWithDefault(opt, $$default) {
-  if (opt !== undefined) {
-    return Js_primitive.valFromOption(opt);
-  } else {
+  if (opt.tag) {
     return $$default;
+  } else {
+    return opt[0];
   }
 }
 
-function isSome(param) {
-  return param !== undefined;
+function isOk(param) {
+  if (param.tag) {
+    return false;
+  } else {
+    return true;
+  }
 }
 
-function isNone(x) {
-  return x === undefined;
+function isError(param) {
+  if (param.tag) {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 function eqU(a, b, f) {
-  if (a !== undefined) {
-    if (b !== undefined) {
-      return f(Js_primitive.valFromOption(a), Js_primitive.valFromOption(b));
+  if (a.tag) {
+    if (b.tag) {
+      return true;
     } else {
       return false;
     }
+  } else if (b.tag) {
+    return false;
   } else {
-    return b === undefined;
+    return f(a[0], b[0]);
   }
 }
 
@@ -78,16 +90,16 @@ function eq(a, b, f) {
 }
 
 function cmpU(a, b, f) {
-  if (a !== undefined) {
-    if (b !== undefined) {
-      return f(Js_primitive.valFromOption(a), Js_primitive.valFromOption(b));
+  if (a.tag) {
+    if (b.tag) {
+      return 0;
     } else {
-      return 1;
+      return -1;
     }
-  } else if (b !== undefined) {
-    return -1;
+  } else if (b.tag) {
+    return 1;
   } else {
-    return 0;
+    return f(a[0], b[0]);
   }
 }
 
@@ -103,8 +115,8 @@ exports.map = map;
 exports.flatMapU = flatMapU;
 exports.flatMap = flatMap;
 exports.getWithDefault = getWithDefault;
-exports.isSome = isSome;
-exports.isNone = isNone;
+exports.isOk = isOk;
+exports.isError = isError;
 exports.eqU = eqU;
 exports.eq = eq;
 exports.cmpU = cmpU;
