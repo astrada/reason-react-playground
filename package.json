@@ -7,7 +7,7 @@
   "license": "MIT",
   "dependencies": {
     "@skidding/react-codemirror": "1.0.1",
-    "@wokalski/vow": "https://github.com/wokalski/vow.git",
+    "@wokalski/vow": "https://github.com/astrada/vow.git#upgrade-bs403",
     "codemirror": "5.29.0",
     "localforage": "^1.5.2",
     "lodash.debounce": "^4.0.8",
@@ -15,8 +15,8 @@
     "react": "^16.1.1",
     "react-dom": "^16.1.1",
     "react-toolbox": "^2.0.0-beta.12",
-    "reason": "^3.1.0",
-    "reason-scripts": "^0.8.0"
+    "reason": "^3.3.2",
+    "reason-scripts": "^0.9.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -27,13 +27,13 @@
     "toolbox": "react-toolbox-themr"
   },
   "devDependencies": {
-    "@astrada/reason-react-toolbox": "^0.6.0",
+    "@astrada/reason-react-toolbox": "^0.6.1",
     "@glennsl/bs-jest": "^0.4.2",
     "browserify": "^14.4.0",
     "bs-platform": "^4.0.3",
     "deamdify": "^0.3.0",
     "react-toolbox-themr": "^1.0.2",
-    "reason-react": "^0.4.2",
+    "reason-react": "^0.5.0",
     "uglifyify": "^4.0.4"
   }
 }
